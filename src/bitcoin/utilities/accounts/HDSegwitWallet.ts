@@ -569,14 +569,14 @@ export default class HDSegwitWallet extends Bitcoin {
     try {
       if (this.network === bitcoinJS.networks.testnet) {
         res = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.TESTNET.MULTIUTXOTXN,
+          config.ESPLORA_API_ENDPOINTS.TESTNET + '/utxotxs',
           {
             addresses: batchedDerivativeAddresses,
           },
         );
       } else {
         res = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.MAINNET.MULTIUTXOTXN,
+          config.ESPLORA_API_ENDPOINTS.MAINNET + '/utxotxs',
           {
             addresses: batchedDerivativeAddresses,
           },

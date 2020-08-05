@@ -207,14 +207,14 @@ export default class Bitcoin {
       if (this.network === bitcoinJS.networks.testnet) {
         // throw new Error("fabricated error");
         res = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.TESTNET.MULTIBALANCE,
+          config.ESPLORA_API_ENDPOINTS.TESTNET + '/balances',
           {
             addresses,
           },
         );
       } else {
         res = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.MAINNET.MULTIBALANCE,
+          config.ESPLORA_API_ENDPOINTS.MAINNET + '/balances',
           {
             addresses,
           },
@@ -274,14 +274,14 @@ export default class Bitcoin {
     try {
       if (this.network === bitcoinJS.networks.testnet) {
         res = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.TESTNET.MULTIUTXOTXN,
+          config.ESPLORA_API_ENDPOINTS.TESTNET + '/utxotxs',
           {
             addresses: [...externalAddresses, ...internalAddresses],
           },
         );
       } else {
         res = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.MAINNET.MULTIUTXOTXN,
+          config.ESPLORA_API_ENDPOINTS.MAINNET + '/utxotxs',
           {
             addresses: [...externalAddresses, ...internalAddresses],
           },
@@ -471,14 +471,14 @@ export default class Bitcoin {
       try {
         if (this.network === bitcoinJS.networks.testnet) {
           res = await bitcoinAxios.post(
-            config.ESPLORA_API_ENDPOINTS.TESTNET.MULTITXN,
+            config.ESPLORA_API_ENDPOINTS.TESTNET + '/data',
             {
               addresses,
             },
           );
         } else {
           res = await bitcoinAxios.post(
-            config.ESPLORA_API_ENDPOINTS.MAINNET.MULTITXN,
+            config.ESPLORA_API_ENDPOINTS.MAINNET + '/data',
             {
               addresses,
             },
@@ -598,14 +598,14 @@ export default class Bitcoin {
       try {
         if (this.network === bitcoinJS.networks.testnet) {
           res = await bitcoinAxios.post(
-            config.ESPLORA_API_ENDPOINTS.TESTNET.MULTITXN,
+            config.ESPLORA_API_ENDPOINTS.TESTNET + '/data',
             {
               addresses,
             },
           );
         } else {
           res = await bitcoinAxios.post(
-            config.ESPLORA_API_ENDPOINTS.MAINNET.MULTITXN,
+            config.ESPLORA_API_ENDPOINTS.MAINNET + '/data',
             {
               addresses,
             },
@@ -815,13 +815,13 @@ export default class Bitcoin {
       let data;
       if (this.network === bitcoinJS.networks.testnet) {
         const res: AxiosResponse = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.TESTNET.MULTIUTXO,
+          config.ESPLORA_API_ENDPOINTS.TESTNET + '/utxos',
           { addresses },
         );
         data = res.data;
       } else {
         const res: AxiosResponse = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.MAINNET.MULTIUTXO,
+          config.ESPLORA_API_ENDPOINTS.MAINNET + '/utxos',
           { addresses },
         );
         data = res.data;
@@ -861,12 +861,12 @@ export default class Bitcoin {
       let data;
       if (this.network === bitcoinJS.networks.testnet) {
         const res: AxiosResponse = await bitcoinAxios.get(
-          config.ESPLORA_API_ENDPOINTS.TESTNET.TXNDETAILS + `/${txID}`,
+          config.ESPLORA_API_ENDPOINTS.TESTNET + '/tx' + `/${txID}`,
         );
         data = res.data;
       } else {
         const res: AxiosResponse = await bitcoinAxios.get(
-          config.ESPLORA_API_ENDPOINTS.MAINNET.TXNDETAILS + `/${txID}`,
+          config.ESPLORA_API_ENDPOINTS.MAINNET + '/tx' + `/${txID}`,
         );
         data = res.data;
       }
@@ -905,12 +905,12 @@ export default class Bitcoin {
       let rates;
       if (this.network === bitcoinJS.networks.testnet) {
         const res: AxiosResponse = await bitcoinAxios.get(
-          config.ESPLORA_API_ENDPOINTS.TESTNET.TXN_FEE,
+          config.ESPLORA_API_ENDPOINTS.TESTNET + '/fee-estimates',
         );
         rates = res.data;
       } else {
         const res: AxiosResponse = await bitcoinAxios.get(
-          config.ESPLORA_API_ENDPOINTS.MAINNET.TXN_FEE,
+          config.ESPLORA_API_ENDPOINTS.MAINNET + '/fee-estimates',
         );
         rates = res.data;
       }
@@ -1146,7 +1146,7 @@ export default class Bitcoin {
       let res: AxiosResponse;
       if (this.network === bitcoinJS.networks.testnet) {
         res = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.TESTNET.BROADCAST_TX,
+          config.ESPLORA_API_ENDPOINTS.TESTNET + '/tx',
           txHex,
           {
             headers: { 'Content-Type': 'text/plain' },
@@ -1154,7 +1154,7 @@ export default class Bitcoin {
         );
       } else {
         res = await bitcoinAxios.post(
-          config.ESPLORA_API_ENDPOINTS.MAINNET.BROADCAST_TX,
+          config.ESPLORA_API_ENDPOINTS.MAINNET + '/tx',
           txHex,
           {
             headers: { 'Content-Type': 'text/plain' },
