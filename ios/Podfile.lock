@@ -109,7 +109,7 @@ PODS:
   - nanopb/decode (0.3.9011)
   - nanopb/encode (0.3.9011)
   - PDFGenerator (3.1.0)
-  - Protobuf (3.11.4)
+  - Protobuf (3.12.0)
   - QRCoder (1.1.0)
   - React (0.59.10):
     - React/Core (= 0.59.10)
@@ -212,12 +212,18 @@ PODS:
     - React
   - RNScreens (1.0.0-alpha.23):
     - React
+  - RNSentry (1.7.1):
+    - React
+    - Sentry (~> 5.2.0)
   - RNShare (1.2.1):
     - React
   - RNSVG (9.13.6):
     - React
   - RNVectorIcons (6.7.0):
     - React
+  - Sentry (5.2.0):
+    - Sentry/Core (= 5.2.0)
+  - Sentry/Core (5.2.0)
   - TcpSockets (3.3.2):
     - React
   - UMBarCodeScannerInterface (4.0.0)
@@ -293,6 +299,7 @@ DEPENDENCIES:
   - RNOS (from `../node_modules/react-native-os`)
   - RNReanimated (from `../node_modules/react-native-reanimated/RNReanimated.podspec`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNShare (from `../node_modules/react-native-share`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
@@ -329,6 +336,7 @@ SPEC REPOS:
     - PDFGenerator
     - Protobuf
     - QRCoder
+    - Sentry
 
 EXTERNAL SOURCES:
   DoubleConversion:
@@ -414,6 +422,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native-reanimated/RNReanimated.podspec"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSentry:
+    :path: "../node_modules/@sentry/react-native"
   RNShare:
     :path: "../node_modules/react-native-share"
   RNSVG:
@@ -493,7 +503,7 @@ SPEC CHECKSUMS:
   jail-monkey: d7c5048b2336f22ee9c9e0efa145f1f917338ea9
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
   PDFGenerator: 17d6bc525db0a3fcd156fbf00f9d1b8d5cc75d1e
-  Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
+  Protobuf: 2793fcd0622a00b546c60e7cbbcc493e043e9bb9
   QRCoder: cbd2bee531cc86d286df7942334cfed94c803ae4
   React: 36d0768f9e93be2473b37e7fa64f92c1d5341eef
   react-native-camera: 8ab02aac456a7db830980cef5f3772644fe96e1f
@@ -513,9 +523,11 @@ SPEC CHECKSUMS:
   RNOS: 6f2f9a70895bbbfbdad7196abd952e7b01d45027
   RNReanimated: b2ab0b693dddd2339bd2f300e770f6302d2e960c
   RNScreens: f28b48b8345f2f5f39ed6195518291515032a788
+  RNSentry: 2bae4ffee2e66376ef42cb845a494c3bde17bc56
   RNShare: 48cf88cadf9ca2143cdaa557c1ec7f8808040ffc
   RNSVG: 8ba35cbeb385a52fd960fd28db9d7d18b4c2974f
   RNVectorIcons: 368d6d8b8301224e5ffb6254191f4f8876c2be0d
+  Sentry: 6e04bc3e11bf771ca79140a112de64dcfbc7d8cb
   TcpSockets: 14306fb79f9750ea7d2ddd02d8bed182abb01797
   UMBarCodeScannerInterface: d5a6fdc98ed6241225b0a8432a7f4e2b397668bc
   UMCameraInterface: 68870a3197fee85bd5afca5609ba4a5b7257d19d
@@ -531,6 +543,6 @@ SPEC CHECKSUMS:
   UMTaskManagerInterface: 1e70fe58b872355f0ecb44fb81bb1a16484047f0
   yoga: 684513b14b03201579ba3cee20218c9d1298b0cc
 
-PODFILE CHECKSUM: ee84328f93944edd163ed35f7bf5ce0383faa559
+PODFILE CHECKSUM: 8b1b441237b973c640ff1efd3c67c1e79460060f
 
 COCOAPODS: 1.8.4

@@ -79,6 +79,8 @@ require_relative '../node_modules/react-native-unimodules/cocoapods'
 
   pod 'RNLocalize', :path => '../node_modules/react-native-localize'
 
+  pod 'RNSentry', :path => '../node_modules/@sentry/react-native'
+
 target 'HEXA' do 
   
 end

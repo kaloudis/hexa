@@ -65,3 +65,4 @@ buck-out/
 env*
 !.env.example
 ios/Podfile.lock
+android/sentry.properties

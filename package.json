@@ -28,6 +28,7 @@
   "projectDirectory": "iOS",
   "dependencies": {
     "@react-native-community/netinfo": "^5.0.0",
+    "@sentry/react-native": "1.7.1",
     "@tradle/react-native-http": "^2.0.0",
     "assert": "^1.1.1",
     "asyncstorage-down": "^4.2.0",
