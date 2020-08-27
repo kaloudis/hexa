@@ -81,7 +81,8 @@ import { insertDBWorker } from './storage';
 import Share from 'react-native-share';
 import RNPrint from 'react-native-print';
 import Toast from '../../components/Toast';
-var Mailer = require('NativeModules').RNMail;
+// var Mailer = require('NativeModules').RNMail;
+import Mailer from 'react-native-mail';
 import config from '../../bitcoin/HexaConfig';
 import idx from 'idx';
 

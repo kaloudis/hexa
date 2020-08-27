@@ -1,4 +1,4 @@
-console.disableYellowBox = true;
+// console.disableYellowBox = true;
 import React, { Component, useState, useEffect } from 'react';
 import Navigator from './src/navigation/Navigator';
 import { store, Provider } from './src/store';
@@ -14,8 +14,10 @@ import { getVersion, getBuildId } from 'react-native-device-info';
 import { setApiHeaders } from './src/services/api';
 import firebase from 'react-native-firebase';
 import { NavigationState } from 'react-navigation';
-import { AsyncStorage } from 'react-native';
+import { AsyncStorage, LogBox } from 'react-native';
 import ModalHeader from './src/components/ModalHeader';
+
+LogBox.ignoreAllLogs();
 
 const prefix = 'hexa://';
 
@@ -26,11 +28,8 @@ class App extends Component {
     super(props);
     firebase.analytics().setAnalyticsCollectionEnabled(true);
     this.NoInternetBottomSheet = React.createRef();
-  }
-
-  componentWillMount = () => {
     this.getAppVersion();
-  };
+  }
 
   getAppVersion = async () => {
     let version = await getVersion();
