@@ -23,14 +23,7 @@ import io.invertase.firebase.fabric.crashlytics.RNFirebaseCrashlyticsPackage;
 import io.invertase.firebase.analytics.RNFirebaseAnalyticsPackage;
 import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
 
-public class MainApplication extends Application implements ShareApplication, ReactApplication {
-  private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(
-      new BasePackageList().getPackageList(), Arrays.<SingletonModule>asList());
-
-  @Override
-  public String getFileProviderAuthority() {
-    return BuildConfig.APPLICATION_ID + ".provider";
-  }
+public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override

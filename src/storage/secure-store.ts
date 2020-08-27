@@ -3,9 +3,13 @@ import Config from "react-native-config";
 
 export const store = async (hash, enc_key) => {
   try {
-    if (await RNSecureStorage.get(Config.ENC_KEY_STORAGE_IDENTIFIER)) {
-      console.log('Old key identified, removing...');
-      await RNSecureStorage.remove(Config.ENC_KEY_STORAGE_IDENTIFIER);
+    try {
+      if (await RNSecureStorage.get(Config.ENC_KEY_STORAGE_IDENTIFIER)) {
+        console.log('Old key identified, removing...');
+        await RNSecureStorage.remove(Config.ENC_KEY_STORAGE_IDENTIFIER);
+      }
+    } catch (err) {
+      console.log("Error while fetching ", err);
     }
     await RNSecureStorage.set(
       Config.ENC_KEY_STORAGE_IDENTIFIER,
@@ -32,7 +36,7 @@ export const fetch = async hash_current => {
     }
     return enc_key;
   } catch (err) {
-    console.log(err);
+    console.log('Secure storage fetch error ', err);
     throw err;
   }
 };

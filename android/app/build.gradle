@@ -74,7 +74,7 @@ apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.grad
  */
 
 project.ext.react = [
-    entryFile: "index.js"
+    // entryFile: "index.js"
     enableHermes: false,  // clean and rebuild if changing
 ]
 
@@ -202,7 +202,6 @@ android {
 }
 
 dependencies {
-    implementation project(':react-native-check-app-install')
     implementation project(':react-native-localize')
     implementation project(':react-native-config')
     implementation project(':jail-monkey')
@@ -216,7 +215,6 @@ dependencies {
     implementation project(':react-native-udp')
     implementation project(':react-native-tcp')
     implementation project(':react-native-os')
-    implementation project(':@react-native-community_netinfo')
     implementation project(':react-native-svg')
     implementation project(':react-native-cardview')
     implementation project(':react-native-video')
