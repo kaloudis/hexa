@@ -1215,10 +1215,14 @@ class HomeUpdated extends Component<HomePropsTypes, HomeStateTypes> {
     });
 
     setTimeout(() => {
-      (this.refs.transactionTabBarBottomSheet as any).snapTo(1);
-      (this.refs.addTabBarBottomSheet as any).snapTo(0);
-      (this.refs.qrTabBarBottomSheet as any).snapTo(0);
-      (this.refs.moreTabBarBottomSheet as any).snapTo(0);
+      const { isLoading } = this.state
+      if (!isLoading) {
+        (this.refs.transactionTabBarBottomSheet as any).snapTo(1);
+        (this.refs.addTabBarBottomSheet as any).snapTo(0);
+        (this.refs.qrTabBarBottomSheet as any).snapTo(0);
+        (this.refs.moreTabBarBottomSheet as any).snapTo(0);
+      }
+
     }, 500);
 
     this.getAssociatedContact();
