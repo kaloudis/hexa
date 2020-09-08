@@ -12,11 +12,7 @@ target 'HEXA' do
   pod 'Crashlytics'
   pod 'PDFGenerator'
   pod 'QRCoder'
-
-  target 'HEXATests' do
-    inherit! :complete
-    # Pods for testing
-  end
+  pod 'Firebase/Messaging'
 
   # Enables Flipper.
   #
@@ -28,14 +24,6 @@ target 'HEXA' do
   # end
 end
 
-target 'HEXA-tvOS' do
-  # Pods for HEXA-tvOS
-
-  target 'HEXA-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
-end
 
 
 # very important to have, unless you removed React dependencies for Libraries

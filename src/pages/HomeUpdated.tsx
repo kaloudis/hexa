@@ -1219,7 +1219,7 @@ class HomeUpdated extends Component<HomePropsTypes, HomeStateTypes> {
       (this.refs.addTabBarBottomSheet as any).snapTo(0);
       (this.refs.qrTabBarBottomSheet as any).snapTo(0);
       (this.refs.moreTabBarBottomSheet as any).snapTo(0);
-    }, 500);
+    }, 2000);
 
     this.getAssociatedContact();
     this.setCurrencyCodeFromAsync();
