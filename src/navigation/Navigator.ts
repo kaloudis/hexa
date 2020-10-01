@@ -15,6 +15,7 @@ import RestoreWalletBySecondaryDevice from '../pages/Recovery/RestoreWalletBySec
 import RestoreWalletUsingDocuments from '../pages/Recovery/RestoreWalletUsingDocuments';
 import RestoreWalletByContacts from '../pages/Recovery/RestoreWalletByContacts';
 import Home from '../pages/Home/Home';
+// import Home from '../pages/Home';
 import ReLogin from '../pages/ReLogin';
 import Accounts from '../pages/Accounts/Index';
 import ManageBackup from '../pages/ManageBackup';

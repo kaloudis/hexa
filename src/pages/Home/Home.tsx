@@ -689,8 +689,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
               carouselAcc === DONATION_ACCOUNT
                 ? 'Donation Account'
                 : serviceType === REGULAR_ACCOUNT
-                ? 'Checking Account'
-                : 'Savings Account',
+                  ? 'Checking Account'
+                  : 'Savings Account',
             unit: 'sats',
             amount: account.balances
               ? account.balances.balance + account.balances.unconfirmedBalance
@@ -699,8 +699,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
               carouselAcc === DONATION_ACCOUNT
                 ? `Donate Bitcoin`
                 : serviceType === REGULAR_ACCOUNT
-                ? 'Fast and easy'
-                : 'Multi-factor security',
+                  ? 'Fast and easy'
+                  : 'Multi-factor security',
             accountType: serviceType,
             subType: carouselAcc,
             iconType: serviceType === REGULAR_ACCOUNT ? 'regular' : 'secure',
@@ -750,9 +750,9 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
         fireDate: date.getTime(),
         //repeatInterval: 'hour',
       })
-      .then(() => {})
+      .then(() => { })
       .catch(
-        (err) => {}, //console.log('err', err)
+        (err) => { }, //console.log('err', err)
       );
     firebase
       .notifications()
@@ -787,7 +787,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           }
         },
       );
-    } catch (error) {}
+    } catch (error) { }
   };
 
   componentDidMount = () => {
@@ -837,7 +837,12 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
         {
           isLoading: false,
         },
-        () => this.props.updateLastSeen(new Date()),
+        () => {
+          if (this.transactionTabBarBottomSheetRef.current) {
+            this.transactionTabBarBottomSheetRef.current?.snapTo(1);
+          }
+          this.props.updateLastSeen(new Date())
+        },
       );
     }, 2);
   };
@@ -941,12 +946,12 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
       .scheduleNotification(notification, {
         fireDate: date.getTime(),
       })
-      .then(() => {})
-      .catch((err) => {});
+      .then(() => { })
+      .catch((err) => { });
     firebase
       .notifications()
       .getScheduledNotifications()
-      .then((notifications) => {});
+      .then((notifications) => { });
   };
 
   componentDidUpdate = (prevProps, prevState) => {
@@ -1018,11 +1023,11 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
       });
     }
 
-    if (prevState.isLoading && !this.state.isLoading) {
-      if (this.transactionTabBarBottomSheetRef.current) {
-        this.transactionTabBarBottomSheetRef.current?.snapTo(1);
-      }
-    }
+    // if (prevState.isLoading && !this.state.isLoading) {
+    //   if (this.transactionTabBarBottomSheetRef.current) {
+    //     this.transactionTabBarBottomSheetRef.current?.snapTo(1);
+    //   }
+    // }
   };
 
   handleDeeplinkModal = () => {
@@ -1171,8 +1176,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
       if (splits[3] !== config.APP_STAGE) {
         Alert.alert(
           'Invalid deeplink',
-          `Following deeplink could not be processed by Hexa:${config.APP_STAGE.toUpperCase()}, use Hexa:${
-            splits[3]
+          `Following deeplink could not be processed by Hexa:${config.APP_STAGE.toUpperCase()}, use Hexa:${splits[3]
           }`,
         );
       } else {
@@ -1505,7 +1509,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
     let testBalance = accounts[TEST_ACCOUNT].service
       ? accounts[TEST_ACCOUNT].service.hdWallet.balances.balance +
-        accounts[TEST_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
+      accounts[TEST_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
       : 0;
 
     const testTransactions = accounts[TEST_ACCOUNT].service
@@ -1516,19 +1520,19 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
     let regularBalance = accounts[REGULAR_ACCOUNT].service
       ? accounts[REGULAR_ACCOUNT].service.hdWallet.balances.balance +
-        accounts[REGULAR_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
+      accounts[REGULAR_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
       : 0;
 
     let regularTransactions = accounts[REGULAR_ACCOUNT].service
       ? accounts[REGULAR_ACCOUNT].service.hdWallet.transactions
-          .transactionDetails
+        .transactionDetails
       : [];
 
     // regular derivative accounts
     for (const dAccountType of config.DERIVATIVE_ACC_TO_SYNC) {
       const derivativeAccount =
         accounts[REGULAR_ACCOUNT].service.hdWallet.derivativeAccounts[
-          dAccountType
+        dAccountType
         ];
       if (derivativeAccount && derivativeAccount.instance.using) {
         for (
@@ -1567,13 +1571,13 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
     let secureBalance = accounts[SECURE_ACCOUNT].service
       ? accounts[SECURE_ACCOUNT].service.secureHDWallet.balances.balance +
-        accounts[SECURE_ACCOUNT].service.secureHDWallet.balances
-          .unconfirmedBalance
+      accounts[SECURE_ACCOUNT].service.secureHDWallet.balances
+        .unconfirmedBalance
       : 0;
 
     const secureTransactions = accounts[SECURE_ACCOUNT].service
       ? accounts[SECURE_ACCOUNT].service.secureHDWallet.transactions
-          .transactionDetails
+        .transactionDetails
       : [];
 
     // secure derivative accounts
@@ -1582,7 +1586,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
       const derivativeAccount =
         accounts[SECURE_ACCOUNT].service.secureHDWallet.derivativeAccounts[
-          dAccountType
+        dAccountType
         ];
       if (derivativeAccount && derivativeAccount.instance.using) {
         for (
@@ -1674,34 +1678,6 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
       transactions: accumulativeTransactions,
       isBalanceLoading: false,
     });
-
-    // if (balancesParam) {
-    //   if (
-    //     JSON.stringify(balancesParam) !==
-    //     JSON.stringify({
-    //       testBalance,
-    //       regularBalance,
-    //       secureBalance,
-    //       accumulativeBalance,
-    //     })
-    //   ) {
-    //     setBalances({
-    //       testBalance,
-    //       regularBalance,
-    //       secureBalance,
-    //       accumulativeBalance,
-    //     });
-    //     setTransactions(accumulativeTransactions);
-    //   }
-    // } else {
-    //   setBalances({
-    //     testBalance,
-    //     regularBalance,
-    //     secureBalance,
-    //     accumulativeBalance,
-    //   });
-    //   setTransactions(accumulativeTransactions);
-    // }
   };
 
   onPressSettingsElements = async (type, currencycode) => {
@@ -1796,7 +1772,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     // this.processDLReques t(key, true);
   };
 
-  onPhoneNumberChange = () => {};
+  onPhoneNumberChange = () => { };
 
   handleBottomTabSelection = (tab: BottomTab) => {
     const knowMoreBottomSheetsFlag = tab === BottomTab.More;
@@ -1955,9 +1931,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
                 postAssociation: (contact) => {
                   let contactName = '';
                   if (contact) {
-                    contactName = `${contact.firstName} ${
-                      contact.lastName ? contact.lastName : ''
-                    }`
+                    contactName = `${contact.firstName} ${contact.lastName ? contact.lastName : ''
+                      }`
                       .toLowerCase()
                       .trim();
                   } else {
@@ -2147,8 +2122,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           if (res.data.releases.length) {
             let releaseNotes = res.data.releases.length
               ? res.data.releases.find((el) => {
-                  return el.build === value.info.split(' ')[1];
-                })
+                return el.build === value.info.split(' ')[1];
+              })
               : '';
             navigation.navigate('UpdateApp', {
               releaseData: [releaseNotes],
@@ -2190,7 +2165,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     } else if (item.title === 'Hexa Community (Telegram)') {
       let url = 'https://t.me/HexaWallet';
       Linking.openURL(url)
-        .then((data) => {})
+        .then((data) => { })
         .catch((e) => {
           alert('Make sure Telegram installed on your device');
         });
@@ -2240,9 +2215,9 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
         ) {
           let temp =
             asyncNotificationList[
-              asyncNotificationList.findIndex(
-                (value) => value.notificationId == element.notificationId,
-              )
+            asyncNotificationList.findIndex(
+              (value) => value.notificationId == element.notificationId,
+            )
             ];
           if (element.notificationType == 'release') {
             readStatus = readStatus;
@@ -2425,8 +2400,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
               Platform.OS == 'ios' && DeviceInfo.hasNotch()
                 ? hp('18%')
                 : Platform.OS == 'android'
-                ? hp('19%')
-                : hp('18%'),
+                  ? hp('19%')
+                  : hp('18%'),
               Platform.OS == 'ios' && DeviceInfo.hasNotch()
                 ? hp('65%')
                 : hp('64%'),
@@ -2473,8 +2448,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
               Platform.OS == 'ios' && DeviceInfo.hasNotch()
                 ? hp('18%')
                 : Platform.OS == 'android'
-                ? hp('19%')
-                : hp('18%'),
+                  ? hp('19%')
+                  : hp('18%'),
               Platform.OS == 'ios' && DeviceInfo.hasNotch()
                 ? hp('65%')
                 : hp('64%'),
@@ -2526,8 +2501,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
               Platform.OS == 'ios' && DeviceInfo.hasNotch()
                 ? hp('18%')
                 : Platform.OS == 'android'
-                ? hp('19%')
-                : hp('18%'),
+                  ? hp('19%')
+                  : hp('18%'),
               Platform.OS == 'ios' && DeviceInfo.hasNotch()
                 ? hp('82%')
                 : hp('82%'),
@@ -2566,8 +2541,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
               Platform.OS == 'ios' && DeviceInfo.hasNotch()
                 ? hp('18%')
                 : Platform.OS == 'android'
-                ? hp('19%')
-                : hp('18%'),
+                  ? hp('19%')
+                  : hp('18%'),
               Platform.OS == 'ios' && DeviceInfo.hasNotch()
                 ? hp('65%')
                 : hp('64%'),

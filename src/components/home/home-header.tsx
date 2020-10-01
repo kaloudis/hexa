@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  AsyncStorage,
   ImageBackground,
   Image,
 } from 'react-native'
@@ -17,14 +16,12 @@ import { UsNumberFormat } from '../../common/utilities';
 import MessageAsPerHealth from '../../components/home/messgae-health';
 import ToggleSwitch from '../../components/ToggleSwitch';
 import HomePageShield from '../../components/HomePageShield';
-const currencyCode = ['BRL', 'CNY', 'JPY', 'GBP', 'KRW', 'RUB', 'TRY', 'INR', 'EUR'];
+const currencyCodes = ['BRL', 'CNY', 'JPY', 'GBP', 'KRW', 'RUB', 'TRY', 'INR', 'EUR'];
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getCurrencyImageName } from '../../common/CommonFunctions/index';
-import { useDispatch, useSelector } from 'react-redux';
-
+import { getCurrencyImageByRegion, getCurrencyImageName } from '../../common/CommonFunctions/index';
+import { useSelector } from 'react-redux';
 
 function setCurrencyCodeToImage(currencyName, currencyColor) {
-
   return (
     <View style={{
       marginRight: 5,
@@ -42,17 +39,16 @@ function setCurrencyCodeToImage(currencyName, currencyColor) {
 const HomeHeader = ({
   onPressNotifications,
   notificationData,
-  walletName,
-  switchOn,
-  getCurrencyImageByRegion,
+  switchOn = false,
   balances,
-  exchangeRates,
-  CurrencyCode,
   navigation,
-  overallHealth,
   onSwitchToggle,
   setCurrencyToggleValue
 }) => {
+  const exchangeRates = useSelector(state => state.accounts.exchangeRates) || []
+  const CurrencyCode = useSelector((state) => state.preferences.currencyCode) || 'USD'
+  const overallHealth = useSelector((state) => state.sss.overallHealth)
+  const walletName = useSelector((state) => state.storage.database.WALLET_SETUP.walletName) || ''
   return (
     <View style={{ ...styles.headerViewContainer, flex: 1 }}>
       <View style={{ flexDirection: 'row', height: '100%' }}>
@@ -103,7 +99,7 @@ const HomeHeader = ({
                   }}
                   source={require('../../assets/images/icons/icon_bitcoin_light.png')}
                 />
-              ) : currencyCode.includes(CurrencyCode) ? (
+              ) : currencyCodes.includes(CurrencyCode) ? (
                 setCurrencyCodeToImage(getCurrencyImageName(CurrencyCode), 'light')
               ) : (
                     <Image
@@ -160,7 +156,6 @@ const HomeHeader = ({
               onSwitchToggle(!switchOn)
               let temp = !switchOn ? 'true' : '';
               setCurrencyToggleValue(temp);
-              //await AsyncStorage.setItem('currencyToggleValue', temp);
             }}
             toggle={switchOn}
           />
@@ -228,3 +223,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
 })
+
+
+// notification data
