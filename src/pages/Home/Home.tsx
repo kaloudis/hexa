@@ -791,22 +791,14 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
   };
 
   componentDidMount = () => {
-    this.updateAccountCardData();
-    this.getBalances();
     this.appStateListener = AppState.addEventListener(
       'change',
       this.onAppStateChange,
     );
-    this.bootStrapNotifications();
     this.setUpFocusListener();
     this.getNewTransactionNotifications();
+    this.bootStrapNotifications();
     Linking.addEventListener('url', this.handleDeepLink);
-    setTimeout(() => {
-      this.setState({
-        transactionsLoading: false,
-      });
-    }, 1000);
-
     this.unsubscribe = NetInfo.addEventListener((state) => {
       setTimeout(() => {
         if (state.isInternetReachable === null) {
@@ -821,8 +813,20 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
       }, 1000);
     });
 
-    // health check
+    this.updateAccountCardData();
+    // this is the one causing delay
+    // TODO -- refactor this
+    // this.getBalances();
 
+    setTimeout(() => {
+      this.setState({
+        transactionsLoading: false,
+      });
+    }, 1000);
+
+
+
+    // health check
     const { s3Service, initHealthCheck } = this.props;
     const { healthCheckInitialized } = s3Service.sss;
     if (!healthCheckInitialized) {
@@ -1023,11 +1027,11 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
       });
     }
 
-    // if (prevState.isLoading && !this.state.isLoading) {
-    //   if (this.transactionTabBarBottomSheetRef.current) {
-    //     this.transactionTabBarBottomSheetRef.current?.snapTo(1);
-    //   }
-    // }
+    if (prevState.isLoading && !this.state.isLoading) {
+      if (this.transactionTabBarBottomSheetRef.current) {
+        this.transactionTabBarBottomSheetRef.current?.snapTo(1);
+      }
+    }
   };
 
   handleDeeplinkModal = () => {
@@ -1506,7 +1510,6 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
   getBalances = () => {
     const { accounts } = this.props;
-
     let testBalance = accounts[TEST_ACCOUNT].service
       ? accounts[TEST_ACCOUNT].service.hdWallet.balances.balance +
       accounts[TEST_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
@@ -2389,7 +2392,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           onSelect={this.handleBottomTabSelection}
           selectedTab={selectedBottomTab}
         />
-        {isLoading ? <Loader /> : null}
+        {/* {isLoading ? <Loader /> : null} */}
 
         {/* Bottom Sheets */}
         {!isLoading && (

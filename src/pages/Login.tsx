@@ -322,7 +322,6 @@ export default function Login(props) {
         trustedContactRequest,
         userKey,
       });
-
       // get data from db , if exists trigger these
       let { database } = await dispatch(fetchDatabase(key))
       if (database) {
