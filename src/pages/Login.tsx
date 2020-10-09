@@ -23,11 +23,7 @@ import { credsAuth } from '../store/actions/setupAndAuth';
 import BottomSheet from 'reanimated-bottom-sheet';
 import LoaderModal from '../components/LoaderModal';
 import { calculateExchangeRate, startupSync } from '../store/actions/accounts';
-import {
-  updateMSharesHealth,
-  checkMSharesHealth,
-  updateWalletImage,
-} from '../store/actions/sss';
+import { updateMSharesHealth, checkMSharesHealth } from '../store/actions/sss';
 import JailMonkey from 'jail-monkey';
 import DeviceInfo from 'react-native-device-info';
 import ErrorModalContents from '../components/ErrorModalContents';
@@ -97,7 +93,9 @@ export default function Login(props) {
     (state) => state.preferences.releaseCasesValue,
   );
 
-  const initialLoadingCompleted = useSelector((state) => state.loaders.initialLoadingCompleted)
+  const initialLoadingCompleted = useSelector(
+    (state) => state.loaders.initialLoadingCompleted,
+  );
 
   const [isDisabledProceed, setIsDisabledProceed] = useState(false);
   // const releases =[
@@ -371,11 +369,9 @@ export default function Login(props) {
               trustedContactRequest,
               userKey,
             });
-          }, 20000)
-
+          }, 20000);
 
           if (dbFetched) {
-            dispatch(updateWalletImage());
             dispatch(calculateExchangeRate());
             dispatch(startupSync());
           }
@@ -385,9 +381,6 @@ export default function Login(props) {
       });
     }
   }, [isAuthenticated, dbFetched]);
-
-
-
 
   useEffect(() => {
     if (initialLoadingCompleted) {
@@ -401,19 +394,15 @@ export default function Login(props) {
         userKey,
       });
       if (timer) {
-        clearTimeout(timer)
+        clearTimeout(timer);
       }
-
     }
-  }, [initialLoadingCompleted])
-
-
-
+  }, [initialLoadingCompleted]);
 
   const handleLoaderMessages = (passcode) => {
     setTimeout(() => {
       dispatch(credsAuth(passcode));
-    }, 2)
+    }, 2);
   };
   const renderLoaderModalContent = useCallback(() => {
     return (
@@ -537,8 +526,8 @@ export default function Login(props) {
                     ) : passcode.length == 0 && passcodeFlag == true ? (
                       <Text style={styles.passcodeTextInputText}>{'|'}</Text>
                     ) : (
-                          ''
-                        )}
+                      ''
+                    )}
                   </Text>
                 </View>
                 <View
@@ -566,8 +555,8 @@ export default function Login(props) {
                     ) : passcode.length == 1 ? (
                       <Text style={styles.passcodeTextInputText}>{'|'}</Text>
                     ) : (
-                          ''
-                        )}
+                      ''
+                    )}
                   </Text>
                 </View>
                 <View
@@ -595,8 +584,8 @@ export default function Login(props) {
                     ) : passcode.length == 2 ? (
                       <Text style={styles.passcodeTextInputText}>{'|'}</Text>
                     ) : (
-                          ''
-                        )}
+                      ''
+                    )}
                   </Text>
                 </View>
                 <View
@@ -624,8 +613,8 @@ export default function Login(props) {
                     ) : passcode.length == 3 ? (
                       <Text style={styles.passcodeTextInputText}>{'|'}</Text>
                     ) : (
-                          ''
-                        )}
+                      ''
+                    )}
                   </Text>
                 </View>
               </View>
@@ -795,7 +784,7 @@ export default function Login(props) {
           </View>
         </View>
         <BottomSheet
-          onCloseEnd={() => { }}
+          onCloseEnd={() => {}}
           enabledGestureInteraction={false}
           enabledInnerScrolling={true}
           ref={loaderBottomSheet}

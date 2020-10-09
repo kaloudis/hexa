@@ -330,12 +330,19 @@ function* updateEphemeralChannelWorker({ payload }) {
     } else {
       yield call(insertDBWorker, { payload: { SERVICES: updatedSERVICES } });
     }
+    yield call(
+      AsyncStorage.setItem,
+      'preSyncTC',
+      JSON.stringify(trustedContacts.tc.trustedContacts),
+    ); // prevents trusted contact syncher from doing an unnecessary re-updation of WI
 
     const data: EphemeralDataElements = res.data.data;
     if (data && data.shareTransferDetails) {
       const { otp, encryptedKey } = data.shareTransferDetails;
-      // yield delay(1000); // introducing delay in order to evade database insertion collision
-      yield put(downloadMShare(encryptedKey, otp));
+      yield put(downloadMShare(encryptedKey, otp)); // WI updation is handled by MShare downloader
+    } else {
+      console.log('Updating WI');
+      yield put(updateWalletImage());
     }
   } else {
     console.log(res.err);
@@ -710,9 +717,8 @@ export function* trustedChannelsSyncWorker() {
       payload: { SERVICES: updatedSERVICES },
     });
 
-    console.log('Updating WI...');
+    console.log('Updating WI');
     yield put(updateWalletImage());
-
     yield call(AsyncStorage.setItem, 'preSyncTC', postSyncTC);
   }
 

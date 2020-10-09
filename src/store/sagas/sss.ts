@@ -46,6 +46,7 @@ import {
   personalCopyShared,
   pdfHealthCheckFailed,
   personalCopyGenerated,
+  updateWalletImage,
 } from '../actions/sss';
 import S3Service from '../../bitcoin/services/sss/S3Service';
 import SecureAccount from '../../bitcoin/services/accounts/SecureAccount';
@@ -197,7 +198,7 @@ function* uploadEncMetaShareWorker({ payload }) {
       ]; // removing secondary device's TC
       const accountNumber =
         regularService.hdWallet.trustedContactToDA[
-        payload.contactInfo.contactName
+          payload.contactInfo.contactName
         ];
       if (accountNumber) {
         delete regularService.hdWallet.derivativeAccounts[TRUSTED_CONTACTS][
@@ -217,8 +218,8 @@ function* uploadEncMetaShareWorker({ payload }) {
     if (DECENTRALIZED_BACKUP.SHARES_TRANSFER_DETAILS[payload.shareIndex]) {
       if (
         Date.now() -
-        DECENTRALIZED_BACKUP.SHARES_TRANSFER_DETAILS[payload.shareIndex]
-          .UPLOADED_AT <
+          DECENTRALIZED_BACKUP.SHARES_TRANSFER_DETAILS[payload.shareIndex]
+            .UPLOADED_AT <
         config.TC_REQUEST_EXPIRY
       ) {
         // re-upload after 10 minutes (removal sync w/ relayer)
@@ -517,8 +518,12 @@ function* downloadMetaShareWorker({ payload }) {
       console.log({ updatedBackup });
 
       // yield call(updateDynamicNonPMDDWorker, { payload: { dynamicNonPMDD } }); // upload updated dynamic nonPMDD (TODO: time-based?)
+      console.log('Share downloaded');
       yield put(downloadedMShare(otp, true));
+      console.log("Updating share's health");
       yield put(updateMSharesHealth(updatedBackup));
+      console.log('Updating WI');
+      yield put(updateWalletImage());
     } else {
       let updatedRecoveryShares = {};
       let updated = false;
@@ -661,8 +666,16 @@ function* generatePersonalCopyWorker({ payload }) {
       };
     } else {
       personalCopyDetails = JSON.parse(personalCopyDetails);
-      const originalSharedStatus = personalCopyDetails[selectedPersonalCopy.type] ? personalCopyDetails[selectedPersonalCopy.type].shared : false
-      const originalSharingDetails = personalCopyDetails[selectedPersonalCopy.type] && personalCopyDetails[selectedPersonalCopy.type].sharingDetails ? personalCopyDetails[selectedPersonalCopy.type].sharingDetails : {}
+      const originalSharedStatus = personalCopyDetails[
+        selectedPersonalCopy.type
+      ]
+        ? personalCopyDetails[selectedPersonalCopy.type].shared
+        : false;
+      const originalSharingDetails =
+        personalCopyDetails[selectedPersonalCopy.type] &&
+        personalCopyDetails[selectedPersonalCopy.type].sharingDetails
+          ? personalCopyDetails[selectedPersonalCopy.type].sharingDetails
+          : {};
       personalCopyDetails = {
         ...personalCopyDetails,
         [selectedPersonalCopy.type]: {
@@ -770,7 +783,7 @@ function* sharePersonalCopyWorker({ payload }) {
                 path:
                   Platform.OS == 'android'
                     ? 'file://' +
-                    personalCopyDetails[selectedPersonalCopy.type].path
+                      personalCopyDetails[selectedPersonalCopy.type].path
                     : personalCopyDetails[selectedPersonalCopy.type].path, // The absolute path of the file from which to read data.
                 type: 'pdf', // Mime Type: jpg, png, doc, ppt, html, pdf, csv
                 name: selectedPersonalCopy.title, // Optional: Custom filename for attachment
@@ -797,7 +810,7 @@ function* sharePersonalCopyWorker({ payload }) {
             url:
               Platform.OS == 'android'
                 ? 'file://' +
-                personalCopyDetails[selectedPersonalCopy.type].path
+                  personalCopyDetails[selectedPersonalCopy.type].path
                 : personalCopyDetails[selectedPersonalCopy.type].path,
             type: 'application/pdf',
             showAppsToView: true,
@@ -807,8 +820,8 @@ function* sharePersonalCopyWorker({ payload }) {
           try {
             yield call(Share.open, shareOptions);
           } catch (err) {
-            let errorMessage = idx(err, _ => _.message)
-            if (errorMessage !== "User did not share") {
+            let errorMessage = idx(err, (_) => _.message);
+            if (errorMessage !== 'User did not share') {
               throw new Error(`Share failed: ${err}`);
             }
           }
@@ -877,8 +890,8 @@ function* sharePersonalCopyWorker({ payload }) {
         try {
           yield call(Share.open, shareOptions);
         } catch (err) {
-          let errorMessage = idx(err, _ => _.message)
-          if (errorMessage !== "User did not share") {
+          let errorMessage = idx(err, (_) => _.message);
+          if (errorMessage !== 'User did not share') {
             throw new Error(`Share failed: ${err}`);
           }
         }
@@ -1616,10 +1629,6 @@ const hash = (element) => {
 };
 
 const asyncDataToBackup = async () => {
-  // ASYNC DATA to backup
-  // const FBTCAccount = select(
-  //   (state) => state.fbtc.FBTCAccountData,
-  // );
   const [
     [, TrustedContactsInfo],
     [, personalCopyDetails],
@@ -1639,7 +1648,7 @@ const asyncDataToBackup = async () => {
   return ASYNC_DATA;
 };
 
-function* updateWalletImageWorker({ payload }) {
+function* updateWalletImageWorker() {
   const s3Service: S3Service = yield select((state) => state.sss.service);
 
   let walletImage: WalletImage = {};
@@ -1648,9 +1657,10 @@ function* updateWalletImageWorker({ payload }) {
   );
 
   const walletImageHashes = yield call(AsyncStorage.getItem, 'WI_HASHES');
-  let hashesWI = JSON.parse(walletImageHashes);
+  let hashesWI;
 
   if (walletImageHashes) {
+    hashesWI = JSON.parse(walletImageHashes);
     const currentDBHash = hash(DECENTRALIZED_BACKUP);
     console.log({
       previousDBHash: hashesWI.DECENTRALIZED_BACKUP,
@@ -1714,7 +1724,8 @@ function* updateWalletImageWorker({ payload }) {
   const res = yield call(s3Service.updateWalletImage, walletImage);
   if (res.status === 200) {
     if (res.data.updated) console.log('Wallet Image updated');
-    yield call(AsyncStorage.setItem, 'WI_HASHES', JSON.stringify(hashesWI));
+    if (hashesWI)
+      yield call(AsyncStorage.setItem, 'WI_HASHES', JSON.stringify(hashesWI));
   } else {
     console.log({ err: res.err });
     throw new Error('Failed to update Wallet Image');
