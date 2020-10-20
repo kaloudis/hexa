@@ -6,7 +6,7 @@ const swanOAuchURL = Config.swanAuth || '';
 export const accountSync = (data) =>
   axios({
     method: 'get',
-    url: URL + 'account-sync/' + Config.WALLET_SLUG + '/' + data.userKey, // wallet_slug/user_key',
+    url: URL + 'account-sync/' + Config.WALLET_SLUG + '/' + data.userKey,,
   });
 
 export const getQuote = (data) =>
