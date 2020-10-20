@@ -1,24 +1,25 @@
 import axios from 'axios';
 import Config from "react-native-config";
 
-const swanOAuchURL = Config.swanAuth || '';
+const swanOAuthURL = Config.SWAN_URL || 'https://dev-api.swanbitcoin.com/';
 
-export const accountSync = (data) =>
+export const getSwanAuthToken = (data) => 
   axios({
     method: 'get',
-    url: URL + 'account-sync/' + Config.WALLET_SLUG + '/' + data.userKey,,
-  });
+    url: swanOAuthURL,
+  })
 
-export const getQuote = (data) =>
+export const linkSwanWallet = (data) =>
   axios({
     method: 'post',
-    url: URL + 'quote',
+    url: swanOAuthURL.concat('wallets?mode=swan'),
     data,
-  });
+    headers: { Authorization: `Bearer ${data.swanAuthToken}` }
+  })
 
-export const executeOrder = (data) =>
+export const syncSwanWallet = (data) =>
   axios({
-    method: 'post',
-    url: URL + 'execute',
-    data,
-  });
+    method: 'get',
+    url: `${swanOAuthURL}wallets/${data.swanWalletId}?mode=swan`,
+    headers: { Authorization: `Bearer ${data.swanAuthToken}` }
+  })
