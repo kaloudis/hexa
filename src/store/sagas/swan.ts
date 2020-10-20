@@ -1,21 +1,6 @@
 import { call, put } from 'redux-saga/effects';
 
 import {
-  accountSyncSuccess,
-  accountSyncFail,
-  getQuoteSuccess,
-  getQuoteFail,
-  executeOrderSuccess,
-  executeOrderFail,
-  getBalancesSuccess,
-  getBalancesFail,
-  ACCOUNT_SYNC,
-  GET_QUOTE,
-  EXECUTE_ORDER,
-  GET_BALANCES,
-} from '../actions/fbtc';
-
-import {
   GET_SWAN_TOKEN,
   getSwanTokenSuccess,
   getSwanTokenFail,
@@ -30,54 +15,60 @@ import {
   syncSwanWallet,
 } from '../../services/swan';
 
-import { accountSync, getQuote, executeOrder } from '../../services/fbtc';
-
 import { createWatcher } from '../utils/utilities';
 
-export function* accountSyncWorker({ payload }) {
-  console.log('payload', payload.data);
+export function* getSwanTokenWorker({ payload }) {
+  console.log('getSwanTokenWorker payload', payload.data);
   try {
-    let result = yield call(accountSync, payload.data);
-    //   let result = {
-    //     "data":{
-    //     "redeem_vouchers": true,
-    //       "exchange_balances": true,
-    //       "sell_bitcoins": true
-    //     }
-    // }
+    let result = yield call(getSwanAuthToken, payload.data);
+
     console.log('result', result);
     if (!result || result.status !== 200) {
       let data = {
-        accountSyncFail: true,
-        accountSyncFailMessage: 'Account sync fail',
+        getSwanTokenFail: true,
+        getSwanTokenFailMessage: 'Swan authentication failed',
       };
-      yield put(accountSyncFail(data));
+      yield put(getSwanTokenFail(data));
     } else {
-      
-      yield put(accountSyncSuccess(result.data));
+      /*
+      If we are here that means authentication was succesful with Swan
+      there are 2 options to consider
+
+      Option 1:
+      User is now athenticated with Swan so they really do have a Swan account
+      we can now create a Swan Account and save:
+      swan xpub,
+      The returned auth token
+      initial linkingStatus as 'NOT_LINKED'
+      isConfirmed  as false
+
+      Option 2:
+      Create the swan account shell as a separate action and reducer
+      and update it when we get the auth token.
+      */
+
+      yield put(getSwanTokenSuccess(result.data));
       if (result.error) {
         let data = {
-          accountSyncFail: true,
-          accountSyncFailMessage: result.message
-            ? result.message
-            : 'The wallet account does not exist',
+          getSwanTokenFail: true,
+          getSwanTokenFailMessage: result.message || 'Swan authentication failed',
         };
-        yield put(accountSyncFail(data));
+        yield put(getSwanTokenFail(data));
       }
     }
   } catch (err) {
     console.log('err', err);
     let data = {
-      accountSyncFail: true,
-      accountSyncFailMessage: 'Account sync fail',
+      getSwanTokenFail: true,
+      getSwanTokenFailMessage: 'Swan authentication failed',
     };
-    yield put(accountSyncFail(data));
+    yield put(getSwanTokenFail(data));
   }
 }
 
-export const accountSyncWatcher = createWatcher(
-  accountSyncWorker,
-  ACCOUNT_SYNC,
+export const getSwanTokenWatcher = createWatcher(
+  getSwanTokenWorker,
+  GET_SWAN_TOKEN,
 );
 
 function* linkSwanWalletWorker({ payload }) {
