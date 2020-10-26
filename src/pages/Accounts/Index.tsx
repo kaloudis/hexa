@@ -51,6 +51,7 @@ import {
   fetchDerivativeAccBalTx,
   fetchDerivativeAccAddress,
   setAverageTxFee,
+  syncViaXpubAgent,
 } from '../../store/actions/accounts';
 import {
   setCurrencyToggleValue,
@@ -151,6 +152,7 @@ interface AccountsPropsTypes {
   fetchTransactions: any;
   getTestcoins: any;
   fetchBalanceTx: any;
+  syncViaXpubAgent: any;
   fetchDerivativeAccXpub: any;
   fetchDerivativeAccBalTx: any;
   fetchDerivativeAccAddress: any;
@@ -428,56 +430,58 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
             spendableBalance = 10000;
           }
         }
-      }
 
-      if (serviceType === REGULAR_ACCOUNT || serviceType === SECURE_ACCOUNT) {
-        for (const dAccountType of Object.keys(config.DERIVATIVE_ACC)) {
-          let derivativeAccount;
+        if (serviceType === REGULAR_ACCOUNT || serviceType === SECURE_ACCOUNT) {
+          for (const dAccountType of config.DERIVATIVE_ACC_TO_SYNC) {
+            let derivativeAccount;
 
-          if (serviceType === REGULAR_ACCOUNT) {
-            derivativeAccount =
-              accounts[REGULAR_ACCOUNT].service.hdWallet.derivativeAccounts[
-              dAccountType
-              ];
-          } else if (serviceType === SECURE_ACCOUNT) {
-            if (dAccountType === TRUSTED_CONTACTS) continue;
-            derivativeAccount =
-              accounts[SECURE_ACCOUNT].service.secureHDWallet
-                .derivativeAccounts[dAccountType];
-          }
+            if (serviceType === REGULAR_ACCOUNT) {
+              derivativeAccount =
+                accounts[REGULAR_ACCOUNT].service.hdWallet.derivativeAccounts[
+                  dAccountType
+                ];
+            } else if (serviceType === SECURE_ACCOUNT) {
+              if (dAccountType === TRUSTED_CONTACTS) continue;
+              derivativeAccount =
+                accounts[SECURE_ACCOUNT].service.secureHDWallet
+                  .derivativeAccounts[dAccountType];
+            }
 
-          if (derivativeAccount && derivativeAccount.instance.using) {
-            for (
-              let accountNumber = 1;
-              accountNumber <= derivativeAccount.instance.using;
-              accountNumber++
-            ) {
-              if (derivativeAccount[accountNumber].balances) {
-                currentBalance +=
-                  derivativeAccount[accountNumber].balances.balance +
-                  derivativeAccount[accountNumber].balances.unconfirmedBalance;
-                spendableBalance +=
-                  derivativeAccount[accountNumber].balances.balance;
-              }
+            if (derivativeAccount.instance.using) {
+              for (
+                let accountNumber = 1;
+                accountNumber <= derivativeAccount.instance.using;
+                accountNumber++
+              ) {
+                if (derivativeAccount[accountNumber].balances) {
+                  currentBalance +=
+                    derivativeAccount[accountNumber].balances.balance +
+                    derivativeAccount[accountNumber].balances
+                      .unconfirmedBalance;
+                  spendableBalance +=
+                    derivativeAccount[accountNumber].balances.balance;
+                }
 
-              if (derivativeAccount[accountNumber].transactions) {
-                derivativeAccount[
-                  accountNumber
-                ].transactions.transactionDetails.forEach((tx) => {
-                  let include = true;
-                  for (const currentTx of currentTransactions) {
-                    if (tx.txid === currentTx.txid) {
-                      include = false;
-                      break;
+                if (derivativeAccount[accountNumber].transactions) {
+                  derivativeAccount[
+                    accountNumber
+                  ].transactions.transactionDetails.forEach((tx) => {
+                    let include = true;
+                    for (const currentTx of currentTransactions) {
+                      if (tx.txid === currentTx.txid) {
+                        include = false;
+                        break;
+                      }
                     }
-                  }
-                  if (include) currentTransactions.push(tx);
-                });
+                    if (include) currentTransactions.push(tx);
+                  });
+                }
               }
             }
           }
         }
       }
+
       currentTransactions.sort(function (left, right) {
         return moment.utc(right.date).unix() - moment.utc(left.date).unix();
       });
@@ -594,28 +598,28 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
         this.state.serviceType
       ].loading.derivativeBalanceTx;
     }
-    if (
-      prevProps.accounts.exchangeRates !== this.props.accounts.exchangeRates
-    ) {
-      this.setState({ exchangeRates: this.props.accounts.exchangeRates });
-    }
 
     if (prevState.serviceType !== this.state.serviceType) {
       this.setAverageTransactionFees();
     }
 
-    if (prevProps.accounts !==
-      this.props.accounts) {
+    if (prevProps.accounts !== this.props.accounts) {
       let donationAccUpdated = false;
       for (const serviceType of [REGULAR_ACCOUNT, SECURE_ACCOUNT]) {
-
         const prevDonationAccounts =
-          prevProps.accounts[serviceType].service[serviceType === SECURE_ACCOUNT ? 'secureHDWallet' : 'hdWallet'].derivativeAccounts
+          prevProps.accounts[serviceType].service[
+            serviceType === SECURE_ACCOUNT ? 'secureHDWallet' : 'hdWallet'
+          ].derivativeAccounts;
 
-        const updatedDonationAccounts =
-          this.props.accounts[serviceType].service[serviceType === SECURE_ACCOUNT ? 'secureHDWallet' : 'hdWallet'].derivativeAccounts
+        const updatedDonationAccounts = this.props.accounts[serviceType]
+          .service[
+          serviceType === SECURE_ACCOUNT ? 'secureHDWallet' : 'hdWallet'
+        ].derivativeAccounts;
 
-        if (prevDonationAccounts[DONATION_ACCOUNT] !== updatedDonationAccounts[DONATION_ACCOUNT]) {
+        if (
+          prevDonationAccounts[DONATION_ACCOUNT] !==
+          updatedDonationAccounts[DONATION_ACCOUNT]
+        ) {
           donationAccUpdated = true;
         }
       }
@@ -766,10 +770,10 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
             index == 0
               ? Colors.blue
               : index == 1
-                ? Colors.yellow
-                : index == 2
-                  ? Colors.green
-                  : Colors.borderColor,
+              ? Colors.yellow
+              : index == 2
+              ? Colors.green
+              : Colors.borderColor,
           shadowOpacity: 0.2,
           shadowOffset: { width: 0, height: 7 },
           flexDirection: 'row',
@@ -830,10 +834,14 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                     (this.refs.SecureAccountHelperBottomSheet as any).snapTo(1);
                 } else if (item.accountType == 'Checking Account') {
                   if (this.refs.RegularAccountHelperBottomSheet as any)
-                    (this.refs.RegularAccountHelperBottomSheet as any).snapTo(1);
+                    (this.refs.RegularAccountHelperBottomSheet as any).snapTo(
+                      1,
+                    );
                 } else if (item.accountType == 'Donation Account') {
                   if (this.refs.DonationAccountHelperBottomSheet as any)
-                    (this.refs.DonationAccountHelperBottomSheet as any).snapTo(1);
+                    (this.refs.DonationAccountHelperBottomSheet as any).snapTo(
+                      1,
+                    );
                 }
               }}
             >
@@ -941,32 +949,32 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                 )}
               </View>
             ) : (
-                  <Image
-                    style={styles.cardBitCoinImage}
-                    source={getCurrencyImageByRegion(
-                      this.state.CurrencyCode,
-                      'light',
-                    )}
-                  />
+              <Image
+                style={styles.cardBitCoinImage}
+                source={getCurrencyImageByRegion(
+                  this.state.CurrencyCode,
+                  'light',
                 )}
+              />
+            )}
             <Text style={styles.cardAmountText}>
               {item.accountType == 'Test Account'
                 ? UsNumberFormat(this.state.netBalance)
                 : this.state.switchOn
-                  ? UsNumberFormat(this.state.netBalance)
-                  : this.state.exchangeRates
-                    ? (
-                      (this.state.netBalance / 1e8) *
-                      this.state.exchangeRates[this.state.CurrencyCode].last
-                    ).toFixed(2)
-                    : null}
+                ? UsNumberFormat(this.state.netBalance)
+                : this.state.exchangeRates
+                ? (
+                    (this.state.netBalance / 1e8) *
+                    this.state.exchangeRates[this.state.CurrencyCode].last
+                  ).toFixed(2)
+                : null}
             </Text>
             <Text style={styles.cardAmountUnitText}>
               {item.accountType == 'Test Account'
                 ? 't-sats'
                 : this.state.switchOn
-                  ? 'sats'
-                  : this.state.CurrencyCode.toLocaleLowerCase()}
+                ? 'sats'
+                : this.state.CurrencyCode.toLocaleLowerCase()}
             </Text>
           </View>
         </View>
@@ -1077,7 +1085,7 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
           <Text style={styles.headerText}>Accounts</Text>
           <TouchableOpacity
             style={{ height: 54, justifyContent: 'center' }}
-            onPress={() => { }}
+            onPress={() => {}}
           >
             <View
               style={{
@@ -1092,17 +1100,17 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                 activeOffImage={
                   this.currencyCode.includes(CurrencyCode)
                     ? this.setCurrencyCodeToImage(
-                      getCurrencyImageName(CurrencyCode),
-                      'light',
-                    )
+                        getCurrencyImageName(CurrencyCode),
+                        'light',
+                      )
                     : getCurrencyImageByRegion(CurrencyCode, 'light')
                 }
                 inactiveOffImage={
                   this.currencyCode.includes(CurrencyCode)
                     ? this.setCurrencyCodeToImage(
-                      getCurrencyImageName(CurrencyCode),
-                      'dark',
-                    )
+                        getCurrencyImageName(CurrencyCode),
+                        'dark',
+                      )
                     : getCurrencyImageByRegion(CurrencyCode, 'dark')
                 }
                 toggleColor={Colors.lightBlue}
@@ -1121,6 +1129,7 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
         {this.state.is_initiated ? (
           <View style={{ flex: 1 }}>
             <ScrollView
+              showsVerticalScrollIndicator={false}
               contentContainerStyle={{
                 backgroundColor: Colors.backgroundColor,
               }}
@@ -1185,18 +1194,18 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                       {serviceType == TEST_ACCOUNT
                         ? UsNumberFormat(spendableBalance)
                         : switchOn
-                          ? UsNumberFormat(spendableBalance)
-                          : exchangeRates
-                            ? (
-                              (spendableBalance / 1e8) *
-                              exchangeRates[CurrencyCode].last
-                            ).toFixed(2)
-                            : null}{' '}
+                        ? UsNumberFormat(spendableBalance)
+                        : exchangeRates
+                        ? (
+                            (spendableBalance / 1e8) *
+                            exchangeRates[CurrencyCode].last
+                          ).toFixed(2)
+                        : null}{' '}
                       {serviceType == TEST_ACCOUNT
                         ? 't-sats'
                         : switchOn
-                          ? 'sats'
-                          : CurrencyCode.toLocaleLowerCase()}
+                        ? 'sats'
+                        : CurrencyCode.toLocaleLowerCase()}
                     </Text>
                     {/* <Text
                       style={{
@@ -1241,8 +1250,8 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                             () => {
                               (this.refs
                                 .TransactionDetailsBottomSheet as any).snapTo(
-                                  1,
-                                );
+                                1,
+                              );
                               this.checkNShowHelperModal();
                               setTimeout(() => {
                                 this.setState({ transactionItem: item });
@@ -1338,11 +1347,11 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                             name={"dot-single"}
                             color={Colors.textColorGrey}
                           /> */}
-                                    {/* {item.time} */}
-                                  </Text>
-                                </View>
+                                  {/* {item.time} */}
+                                </Text>
                               </View>
-                            )}
+                            </View>
+                          )}
                           <View style={styles.transactionModalAmountView}>
                             <Image
                               source={require('../../assets/images/icons/icon_bitcoin_gray.png')}
@@ -1362,13 +1371,13 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                                 {item.accountType == 'Test Account'
                                   ? UsNumberFormat(item.amount)
                                   : switchOn
-                                    ? UsNumberFormat(item.amount)
-                                    : exchangeRates
-                                      ? (
-                                        (item.amount / 1e8) *
-                                        exchangeRates[CurrencyCode].last
-                                      ).toFixed(2)
-                                      : null}
+                                  ? UsNumberFormat(item.amount)
+                                  : exchangeRates
+                                  ? (
+                                      (item.amount / 1e8) *
+                                      exchangeRates[CurrencyCode].last
+                                    ).toFixed(2)
+                                  : null}
 
                                 {/* {UsNumberFormat(item.amount)} */}
                               </Text>
@@ -1378,8 +1387,8 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                                 {item.accountType == 'Test Account'
                                   ? 't-sats'
                                   : switchOn
-                                    ? 'sats'
-                                    : CurrencyCode.toLocaleLowerCase()}
+                                  ? 'sats'
+                                  : CurrencyCode.toLocaleLowerCase()}
                               </Text>
                             </View>
                             <Text
@@ -1392,11 +1401,11 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                                 ? item.confirmations < 6
                                   ? item.confirmations
                                   : item.confirmations === '-' // for testnet faucet tx
-                                    ? item.confirmations
-                                    : '6+'
-                                : item.confirmations < 6
                                   ? item.confirmations
-                                  : '6+'}
+                                  : '6+'
+                                : item.confirmations < 6
+                                ? item.confirmations
+                                : '6+'}
                             </Text>
                             {index == 0 ? (
                               <View style={styles.forwardIconView}>
@@ -1407,14 +1416,14 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                                 />
                               </View>
                             ) : (
-                                <View style={styles.forwardIconView}>
-                                  <Ionicons
-                                    name="ios-arrow-forward"
-                                    color={Colors.textColorGrey}
-                                    size={12}
-                                  />
-                                </View>
-                              )}
+                              <View style={styles.forwardIconView}>
+                                <Ionicons
+                                  name="ios-arrow-forward"
+                                  color={Colors.textColorGrey}
+                                  size={12}
+                                />
+                              </View>
+                            )}
                           </View>
                         </TouchableOpacity>
                       )}
@@ -1429,6 +1438,10 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                     onPress={() => {
                       this.props.navigation.navigate('Send', {
                         serviceType,
+                        derivativeAccountDetails: this.state.presentCarouselData
+                          ? this.state.presentCarouselData
+                              .derivativeAccountDetails
+                          : null,
                         getServiceType: this.getServiceType,
                         carouselIndex: this.state.presentCarouselIndex,
                         averageTxFees,
@@ -1449,12 +1462,12 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                         Tran Fee : (~
                         {switchOn || serviceType === TEST_ACCOUNT
                           ? (averageTxFees
-                            ? averageTxFees['medium'].averageTxFee
-                            : 0) +
-                          ' ' +
-                          (serviceType === TEST_ACCOUNT ? 't-sats' : 'sats')
+                              ? averageTxFees['medium'].averageTxFee
+                              : 0) +
+                            ' ' +
+                            (serviceType === TEST_ACCOUNT ? 't-sats' : 'sats')
                           : exchangeRates
-                            ? (
+                          ? (
                               ((averageTxFees
                                 ? averageTxFees['medium'].averageTxFee
                                 : 0) /
@@ -1463,7 +1476,7 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                             ).toFixed(2) +
                             ' ' +
                             CurrencyCode.toLocaleLowerCase()
-                            : null}
+                          : null}
                         )
                         {/* {averageTxFees ? averageTxFees['low'].averageTxFee : 0}{' '}
                         ({serviceType == TEST_ACCOUNT
@@ -1478,9 +1491,12 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                     onPress={() => {
                       this.props.navigation.navigate('Receive', {
                         serviceType,
+                        derivativeAccountDetails: this.state.presentCarouselData
+                          ? this.state.presentCarouselData
+                              .derivativeAccountDetails
+                          : null,
                         getServiceType: this.getServiceType,
                         carouselIndex: this.state.presentCarouselIndex,
-                        netBalance,
                       });
                     }}
                     style={styles.bottomCardView}
@@ -1531,15 +1547,15 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
             {showLoader ? <Loader /> : null}
           </View>
         ) : (
-            <ScrollView
-              contentContainerStyle={{
-                backgroundColor: Colors.backgroundColor,
-              }}
-              refreshControl={
-                <RefreshControl refreshing={!this.state.is_initiated} />
-              }
-            />
-          )}
+          <ScrollView
+            contentContainerStyle={{
+              backgroundColor: Colors.backgroundColor,
+            }}
+            refreshControl={
+              <RefreshControl refreshing={!this.state.is_initiated} />
+            }
+          />
+        )}
         <BottomSheet
           enabledInnerScrolling={true}
           ref={'DonationWebPageBottomSheet'}
@@ -1655,7 +1671,8 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                     (item) => {}
                     //this.setState({ selectedTransactionItem: item })
                   }
-                  setTabBarZIndex={(index) => { }
+                  setTabBarZIndex={
+                    (index) => {}
                     //this.setState({ tabBarIndex: index })
                   }
                   transactionDetailsBottomSheetRef={
@@ -1923,17 +1940,15 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
                 onPressHeader={() => {
                   if (isDonationAccountHelperDone) {
                     if (this.refs.DonationAccountHelperBottomSheet as any)
-                      (this.refs.DonationAccountHelperBottomSheet as any).snapTo(
-                        1,
-                      );
+                      (this.refs
+                        .DonationAccountHelperBottomSheet as any).snapTo(1);
                     setTimeout(() => {
                       this.setState({ isDonationAccountHelperDone: false });
                     }, 10);
                   } else {
                     if (this.refs.DonationAccountHelperBottomSheet as any)
-                      (this.refs.DonationAccountHelperBottomSheet as any).snapTo(
-                        0,
-                      );
+                      (this.refs
+                        .DonationAccountHelperBottomSheet as any).snapTo(0);
                   }
                 }}
               />
@@ -1972,6 +1987,7 @@ export default withNavigationFocus(
     fetchTransactions,
     getTestcoins,
     fetchBalanceTx,
+    syncViaXpubAgent,
     fetchDerivativeAccXpub,
     fetchDerivativeAccBalTx,
     fetchDerivativeAccAddress,
@@ -2092,8 +2108,8 @@ const styles = StyleSheet.create({
       Platform.OS == 'ios' && DeviceInfo.hasNotch()
         ? 50
         : Platform.OS == 'android'
-          ? 43
-          : 40,
+        ? 43
+        : 40,
     borderTopLeftRadius: 10,
     borderLeftColor: Colors.borderColor,
     borderLeftWidth: 1,

@@ -14,7 +14,7 @@ import RestoreWalletBySecondaryDevice from '../pages/Recovery/RestoreWalletBySec
 import RestoreWalletUsingDocuments from '../pages/Recovery/RestoreWalletUsingDocuments';
 import RestoreWalletByContacts from '../pages/Recovery/RestoreWalletByContacts';
 import ReLogin from '../pages/ReLogin';
-import Accounts from '../pages/Accounts';
+import Accounts from '../pages/Accounts/Index';
 import ManageBackup from '../pages/ManageBackup';
 import CustodianRequestOTP from '../pages/CustodianRequest/CustodianRequestOTP';
 import CustodianRequestAccepted from '../pages/CustodianRequest/CustodianRequestAccepted';
@@ -75,7 +75,6 @@ import NewOwnQuestions from '../pages/NewOwnQuestions';
 import NewRecoveryOwnQuestions from '../pages/Recovery/NewRecoveryOwnQuestions';
 import AddNewAccount from '../pages/Accounts/AddNewAccount';
 import AddNewDonationAccount from '../pages/Accounts/AddNewDonationAccount';
-import MoreOptionsStack from './stacks/more-options/MoreOptionsStack';
 import AllTransactionsStack from './stacks/transactions/AllTransactionsStack';
 import HomeStack from './stacks/home/HomeStack';
 
@@ -125,13 +124,14 @@ const MODAL_ROUTES = [
   'RecoveryRequestOTP',
   'Confirmation',
   'Intermediate',
+  'AllTransactions',
 ];
 
 const HomeNavigator = createStackNavigator(
   {
     Home: {
       screen: HomeStack,
-      path: 'Home',
+      path: 'home',
     },
     ReLogin: {
       screen: ReLogin,
@@ -217,9 +217,6 @@ const HomeNavigator = createStackNavigator(
       navigationOptions: {
         gesturesEnabled: false,
       },
-    },
-    MoreOptions: {
-      screen: MoreOptionsStack,
     },
   },
   {
