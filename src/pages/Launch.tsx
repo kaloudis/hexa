@@ -7,7 +7,6 @@ import {
   Alert,
   AsyncStorage,
   Platform,
-  AppState,
 } from 'react-native';
 import Video from 'react-native-video';
 import Colors from '../common/Colors';
@@ -18,12 +17,11 @@ import DeviceInfo from 'react-native-device-info';
 import ErrorModalContents from '../components/ErrorModalContents';
 import ModalHeader from '../components/ModalHeader';
 import {
-  widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import config from '../bitcoin/HexaConfig';
-import { isCompatible } from './Home/Home';
 import { connect } from 'react-redux'
+import checkAppVersionCompatibility from '../utils/CheckAppVersionCompatibility';
 
 interface HomePropsTypes {
   initializeDB: any;
@@ -31,7 +29,7 @@ interface HomePropsTypes {
   lastSeen: any;
 }
 
-interface HomeStateTypes {}
+interface HomeStateTypes { }
 
 class Launch extends Component<HomePropsTypes, HomeStateTypes> {
   errorBottomSheet: any;
@@ -43,16 +41,7 @@ class Launch extends Component<HomePropsTypes, HomeStateTypes> {
   componentDidMount = () => {
     this.props.initializeDB();
 
-    AppState.addEventListener("change", this.handleAppStateChange);
-    Linking.addEventListener('url', this.handleAppStateChange);
-
-    this.handleDeepLinking();
-  };
-
-
-  componentWillUnmount = () => {
-    AppState.removeEventListener("change", this.handleAppStateChange);
-    Linking.removeEventListener('url', this.handleAppStateChange);
+    this.handleDeepLink();
   };
 
 
@@ -88,28 +77,32 @@ class Launch extends Component<HomePropsTypes, HomeStateTypes> {
     }
   };
 
-  handleDeepLinking = async () => {
+  handleDeepLink = async () => {
     try {
       const url = await Linking.getInitialURL();
 
-      console.log("Launch::handleDeepLinking::initialURL: " + url);
-
       setTimeout(async () => {
-        if (await AsyncStorage.getItem('hasCreds'))
-          if (!url) this.props.navigation.replace('Login');
-          else {
+        if (await AsyncStorage.getItem('hasCreds')) {
+          if (!url) {
+            this.props.navigation.replace('Login');
+          } else {
             const splits = url.split('/');
+
             if (splits[5] === 'sss') {
               const requester = splits[4];
+
               if (splits[6] === 'ek') {
                 const custodyRequest = {
                   requester,
                   ek: splits[7],
                   uploadedAt: splits[8],
                 };
+
                 this.props.navigation.replace('Login', { custodyRequest });
+
               } else if (splits[6] === 'rk') {
                 const recoveryRequest = { requester, rk: splits[7] };
+
                 this.props.navigation.replace('Login', { recoveryRequest });
               }
             } else if (['tc', 'tcg', 'atcg', 'ptc'].includes(splits[4])) {
@@ -117,13 +110,19 @@ class Launch extends Component<HomePropsTypes, HomeStateTypes> {
                 Alert.alert(
                   'Invalid deeplink',
                   `Following deeplink could not be processed by Hexa:${config.APP_STAGE.toUpperCase()}, use Hexa:${
-                    splits[3]
+                  splits[3]
                   }`,
                 );
               } else {
                 const version = splits.pop().slice(1);
+
                 if (version) {
-                  if (!(await isCompatible(splits[4], version))) return;
+                  if (!(await checkAppVersionCompatibility({
+                    relayCheckMethod: splits[4],
+                    version,
+                  }))) {
+                    return;
+                  }
                 }
 
                 const trustedContactRequest = {
@@ -158,15 +157,20 @@ class Launch extends Component<HomePropsTypes, HomeStateTypes> {
               );
             } else if (url.includes('fastbitcoins')) {
               const userKey = url.substr(url.lastIndexOf('/') + 1);
+
               this.props.navigation.navigate('Login', { userKey });
             } else {
               const EmailToken = url.substr(url.lastIndexOf('/') + 1);
+
               console.log('EmailToken', EmailToken);
               this.props.navigation.navigate('SignUpDetails', { EmailToken });
             }
           }
-        else this.props.navigation.replace('PasscodeConfirm');
+        } else {
+          this.props.navigation.replace('PasscodeConfirm');
+        }
       }, 4000);
+
     } catch (err) {
       (this.errorBottomSheet as any).current.snapTo(1);
     }

@@ -20,67 +20,6 @@ export interface Props {
   selectedTab: BottomTab | null;
 }
 
-type TabItem = {
-  tab: BottomTab;
-  activeImageSource: ImageSourcePropType;
-  inactiveImageSource: ImageSourcePropType;
-};
-
-const tabItems: TabItem[] = [
-  {
-    tab: BottomTab.Transactions,
-    activeImageSource: require('../../assets/images/HomePageIcons/icon_transactions_active.png'),
-    inactiveImageSource: require('../../assets/images/HomePageIcons/icon_transactions.png'),
-  },
-  {
-    tab: BottomTab.Add,
-    activeImageSource: require('../../assets/images/HomePageIcons/icon_add_active.png'),
-    inactiveImageSource: require('../../assets/images/HomePageIcons/icon_add.png'),
-  },
-  {
-    tab: BottomTab.QR,
-    activeImageSource: require('../../assets/images/HomePageIcons/icon_qr_active.png'),
-    inactiveImageSource: require('../../assets/images/HomePageIcons/icon_qr.png'),
-  },
-  {
-    tab: BottomTab.More,
-    activeImageSource: require('../../assets/images/HomePageIcons/icon_more.png'),
-    inactiveImageSource: require('../../assets/images/HomePageIcons/icon_more.png'),
-  },
-];
-
-
-type TabViewProps = {
-  tabItem: TabItem;
-  isActive: boolean;
-  onPress: () => void;
-}
-
-const Tab: React.FC<TabViewProps> = ({
-  tabItem,
-  isActive,
-  onPress,
-}: TabViewProps) => {
-
-  const imageSource = useMemo(() => {
-    return isActive ? tabItem.activeImageSource : tabItem.inactiveImageSource;
-  }, [tabItem.activeImageSource, tabItem.inactiveImageSource, isActive]);
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={styles.tabBarTabView}
-    >
-      <View style={styles.tab}>
-        <Image
-          source={imageSource}
-          style={styles.tabBarImage}
-        />
-      </View>
-    </TouchableOpacity>
-  );
-}
-
 const CustomBottomTabs: React.FC<Props> = ({
   tabBarZIndex = 1,
   onSelect,

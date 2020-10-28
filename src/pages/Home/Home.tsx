@@ -33,8 +33,6 @@ import {
   SUB_PRIMARY_ACCOUNT,
 } from '../../common/constants/serviceTypes';
 import { connect } from 'react-redux';
-import NoInternetModalContents from '../../components/NoInternetModalContents';
-import NetInfo from '@react-native-community/netinfo';
 import {
   downloadMShare,
   initHealthCheck,
@@ -99,39 +97,9 @@ import BottomSheetBackground from '../../components/bottom-sheets/BottomSheetBac
 import BottomSheetHeader from '../Accounts/BottomSheetHeader';
 import BottomSheetHandle from '../../components/bottom-sheets/BottomSheetHandle';
 import { Button } from 'react-native-elements';
+import checkAppVersionCompatibility from '../../utils/CheckAppVersionCompatibility';
 
-export const BOTTOM_SHEET_OPENING_ON_LAUNCH_DELAY = 500; // milliseconds
-
-export const isCompatible = async (method: string, version: string) => {
-  if (!semver.valid(version)) {
-    // handling exceptions: off standard versioning
-    if (version === '0.9') version = '0.9.0';
-    else if (version === '1.0') version = '1.0.0';
-  }
-
-  if (version && semver.gt(version, DeviceInfo.getVersion())) {
-    // checking compatibility via Relay
-    const res = await RelayServices.checkCompatibility(method, version);
-    if (res.status !== 200) {
-      console.log('Failed to check compatibility');
-      return true;
-    }
-
-    const { compatible, alternatives } = res.data;
-    if (!compatible) {
-      if (alternatives) {
-        if (alternatives.update)
-          Alert.alert('Update your app inorder to process this link/QR');
-        else if (alternatives.message) Alert.alert(alternatives.message);
-      } else {
-        Alert.alert('Incompatible link/QR, updating your app might help');
-      }
-      return false;
-    }
-    return true;
-  }
-  return true;
-};
+export const BOTTOM_SHEET_OPENING_ON_LAUNCH_DELAY = 500; // milleseconds
 
 
 const getIconByAccountType = (type) => {
@@ -162,7 +130,7 @@ interface HomeStateTypes {
   switchOn: boolean;
   CurrencyCode: string;
   balances: any;
-  selectedBottomTab: BottomTab | null;
+  selectedBottomTab: BottomTab;
 
   /// TODO: remove the `new` prefix when all bottom sheets are refactored to use the `@gorhom/bottom-sheet` library
   newBottomSheetState: BottomSheetState;
@@ -231,8 +199,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
   appStateListener: any;
   firebaseNotificationListener: any;
   notificationOpenedListener: any;
-  NoInternetBottomSheet: any;
-  unsubscribe: any;
+
+  openBottomSheetOnLaunchTimeout: null | ReturnType<typeof setTimeout>;
 
   openBottomSheetOnLaunchTimeout: null | ReturnType<typeof setTimeout>;
 
@@ -245,7 +213,6 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
   addContactAddressBookBottomSheetRef = createRef<BottomSheet>();
   notificationsListBottomSheetRef = createRef<BottomSheet>();
   custodianRequestRejectedBottomSheetRef = createRef<BottomSheet>();
-  noInternetBottomSheetRef = createRef<BottomSheet>();
 
   static whyDidYouRender = true;
 
@@ -254,8 +221,6 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
     this.focusListener = null;
     this.appStateListener = null;
-    this.NoInternetBottomSheet = React.createRef();
-    this.unsubscribe = null;
     this.openBottomSheetOnLaunchTimeout = null;
 
     this.state = {
@@ -264,7 +229,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
       switchOn: false,
       CurrencyCode: 'USD',
       balances: {},
-      selectedBottomTab: null,
+      selectedBottomTab: BottomTab.Transactions,
       newBottomSheetState: BottomSheetState.Closed,
       secondaryDeviceOtp: {},
       currencyCode: 'USD',
@@ -395,10 +360,19 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     }
 
     try {
-      const scannedData = JSON.parse(qrData)
+      const scannedData = JSON.parse(qrData);
+
       if (scannedData.ver) {
-        if (!(await isCompatible(scannedData.type, scannedData.ver))) return;
+        const isAppVersionCompatible = await checkAppVersionCompatibility({
+          relayCheckMethod: scannedData.type,
+          version: scannedData.ver,
+        });
+
+        if (!isAppVersionCompatible) {
+          return;
+        }
       }
+
       switch (scannedData.type) {
         case 'trustedGuardian':
           const trustedGuardianRequest = {
@@ -690,14 +664,9 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           }
           if (nextAppState === 'inactive' || nextAppState == 'background') {
             this.props.updatePreference({
-              key: 'isInternetModalCome',
+              key: 'hasShownNoInternetWarning',
               value: false,
             });
-            // TODO -- fix this part
-            // await AsyncStorage.setItem(
-            //   'isInternetModalCome',
-            //   JSON.stringify(false),
-            // );
           }
         },
       );
@@ -718,33 +687,14 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     this.setUpFocusListener();
     this.getNewTransactionNotifications();
 
-    this.unsubscribe = NetInfo.addEventListener((state) => {
-      setTimeout(() => {
-        if (state.isInternetReachable === null) {
-          return;
-        }
-
-        if (state.isInternetReachable) {
-          this.noInternetBottomSheetRef.current?.snapTo(0);
-        } else {
-          this.noInternetBottomSheetRef.current?.snapTo(1);
-        }
-      }, 1000);
-    });
-
     // health check
-
     const { s3Service, initHealthCheck } = this.props;
     const { healthCheckInitialized } = s3Service.sss;
     if (!healthCheckInitialized) {
       initHealthCheck();
     }
 
-    Linking.addEventListener('url', this.handleDeepLinkEvent);
-
-    Linking
-      .getInitialURL()
-      .then(this.handleDeepLinking);
+    Linking.addEventListener('url', this.handleDeepLink);
 
     // call this once deeplink is detected aswell
     this.handleDeepLinkModal();
@@ -959,24 +909,18 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     }
   };
 
-  cleanupListeners() {
+  componentWillUnmount() {
     if (typeof this.focusListener === 'function') {
-      this.props.navigation.removeListener('didFocus', this.focusListener);
+      this.focusListener();
     }
-
-    if (typeof this.unsubscribe === 'function') {
-      this.unsubscribe();
+    if (typeof this.firebaseNotificationListener === 'function') {
+      this.firebaseNotificationListener();
     }
-
-    if (typeof this.appStateListener === 'function') {
-      AppState.removeEventListener('change', this.appStateListener);
+    if (typeof this.notificationOpenedListener === 'function') {
+      this.notificationOpenedListener();
     }
 
     clearTimeout(this.openBottomSheetOnLaunchTimeout);
-  }
-
-  componentWillUnmount() {
-    this.cleanupListeners();
   }
 
   openBottomSheetOnLaunch(ref: React.RefObject<BottomSheet>) {
@@ -993,15 +937,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
       navigation.navigate('Home');
     }
 
-    console.log('Home::handleDeepLinkEvent::URL: ', url);
-
-    this.handleDeepLinking(url);
-  }
-
-  handleDeepLinking = async (url: string) => {
-    console.log("Home::handleDeepLinking::URL: " + url);
-
-    const splits = url.split('/');
+    const splits = event.url.split('/');
 
     if (splits[5] === 'sss') {
       const requester = splits[4];
@@ -1045,7 +981,14 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
         const version = splits.pop().slice(1);
 
         if (version) {
-          if (!(await isCompatible(splits[4], version))) return;
+          const isAppVersionCompatible = await checkAppVersionCompatibility({
+            relayCheckMethod: splits[4],
+            version,
+          });
+
+          if (!isAppVersionCompatible) {
+            return;
+          }
         }
 
         const trustedContactRequest = {
@@ -1714,11 +1657,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
   };
 
   closeBottomSheet = () => {
-    this.getActiveBottomSheetRef()?.current?.close();
-
-    this.setState({
-      newBottomSheetState: BottomSheetState.Closed,
-      selectedBottomTab: null,
+    this.setState({ newBottomSheetState: BottomSheetState.Closed }, () => {
+      this.getActiveBottomSheetRef()?.current?.close();
     });
   };
 
@@ -2038,8 +1978,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           snapPoints={[
             -50,
             Platform.OS == 'ios' && DeviceInfo.hasNotch()
-              ? heightPercentageToDP('65%')
-              : heightPercentageToDP('64%'),
+              ? hp('65%')
+              : hp('64%'),
           ]}
           handleComponent={BottomSheetHandle}
           onChange={(newPositionIndex: number) => {
@@ -2077,7 +2017,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
         <BottomSheet
           enabledInnerScrolling={true}
           ref={this.custodianRequestBottomSheetRef}
-          snapPoints={[-50, heightPercentageToDP('60%')]}
+          snapPoints={[-50, hp('60%')]}
           renderContent={() => {
             if (!custodyRequest) {
               return null;
@@ -2144,11 +2084,11 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           snapPoints={[
             -50,
             Platform.OS == 'ios' && DeviceInfo.hasNotch()
-              ? heightPercentageToDP('65%')
-              : heightPercentageToDP('70%'),
+              ? hp('65%')
+              : hp('70%'),
             Platform.OS == 'ios' && DeviceInfo.hasNotch()
-              ? heightPercentageToDP('95%')
-              : heightPercentageToDP('95%'),
+              ? hp('95%')
+              : hp('95%'),
           ]}
           renderContent={() => {
             if (!trustedContactRequest && !recoveryRequest) {
@@ -2179,7 +2119,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           <BottomSheet
             enabledInnerScrolling={true}
             ref={this.custodianRequestRejectedBottomSheetRef}
-            snapPoints={[-50, heightPercentageToDP('60%')]}
+            snapPoints={[-50, hp('60%')]}
             renderContent={() => {
               if (!custodyRequest) return null;
               return (
@@ -2324,29 +2264,6 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
               onPressHeader={() => {
                 this.notificationsListBottomSheetRef.current?.snapTo(0)
               }}
-            />
-          )}
-        />
-        <BottomSheet
-          enabledGestureInteraction={false}
-          enabledInnerScrolling={true}
-          ref={this.NoInternetBottomSheet}
-          snapPoints={[-50, heightPercentageToDP('60%')]}
-          renderContent={() => (
-            <NoInternetModalContents
-              onPressTryAgain={() => {
-                this.noInternetBottomSheetRef.current?.snapTo(0);
-              }}
-              onPressIgnore={() => {
-                this.noInternetBottomSheetRef.current?.snapTo(0);
-              }}
-            />
-          )}
-          renderHeader={() => (
-            <ModalHeader
-            // onPressHeader={() => {
-            //   this.noInternetBottomSheetRef.current?.snapTo(0);
-            // }}
             />
           )}
         />

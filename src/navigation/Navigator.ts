@@ -30,8 +30,6 @@ import TwoFAToken from '../pages/Accounts/TwoFAToken';
 import RecoveryRequestOTP from '../pages/Recovery/RecoveryRequestOTP';
 import RestoreByCloudQrCodeContents from '../pages/Recovery/RestoreByCloudQrCodeContents';
 import EmailModalContents from '../pages/EmailModalContents';
-import Buy from '../pages/Accounts/Buy';
-import Sell from '../pages/Accounts/Sell';
 import QRScannerScreen from '../pages/QRScannerScreen';
 import HealthCheck from '../pages/HealthCheck';
 import SecondaryDeviceHealthCheck from '../pages/HealthCheck/SecondaryDeviceHealthCheck';
@@ -45,7 +43,6 @@ import NewWalletGenerationOTP from '../pages/RegenerateShare/NewWalletGeneration
 import WalletCreationSuccess from '../pages/RegenerateShare/WalletCreationSuccess';
 import SecureScan from '../pages/Accounts/SecureScan';
 import GoogleAuthenticatorOTP from '../pages/Accounts/GoogleAuthenticatorOTP';
-import Confirmation from '../pages/Accounts/Confirmation';
 import TwoFASetup from '../pages/Accounts/TwoFASetup';
 import ShareRecoveryOTP from '../pages/Recovery/ShareRecoveryOTP';
 import SecondaryDeviceHistory from '../pages/ManageBackup/SecondaryDeviceHistory';
@@ -122,7 +119,6 @@ const MODAL_ROUTES = [
   'TwoFAToken',
   'HealthCheckSecurityAnswer',
   'RecoveryRequestOTP',
-  'Confirmation',
   'Intermediate',
   'AllTransactions',
 ];
@@ -170,8 +166,6 @@ const HomeNavigator = createStackNavigator(
     RecoveryRequestOTP,
     RestoreByCloudQrCodeContents,
     EmailModalContents,
-    Buy,
-    Sell,
     QRScanner: QRScannerScreen,
     HealthCheck,
     SecondaryDeviceHealthCheck,
@@ -185,7 +179,6 @@ const HomeNavigator = createStackNavigator(
     WalletCreationSuccess,
     SecureScan,
     GoogleAuthenticatorOTP,
-    Confirmation,
     TwoFASetup,
     SecondaryDeviceHistory,
     TrustedContactHistory,
