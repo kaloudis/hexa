@@ -30,8 +30,7 @@ import {
   removeTransferDetails,
   clearTransfer,
 } from '../../../store/actions/accounts';
-import { syncTrustedChannels } from '../../../store/actions/trustedContacts';
-import { UsNumberFormat } from '../../../common/utilities';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import { ScrollView } from 'react-native-gesture-handler';
 import BottomSheet from 'reanimated-bottom-sheet';
 import DeviceInfo from 'react-native-device-info';
@@ -62,6 +61,7 @@ import BottomInfoBox from '../../../components/BottomInfoBox';
 import AccountSelectionModalContents from '../AccountSelectionModalContents';
 import SmallHeaderModal from '../../../components/SmallHeaderModal';
 import FiatCurrencies from '../../../common/FiatCurrencies';
+import { UsNumberFormat } from '../../../common/utilities';
 
 interface SendToContactPropsTypes {
   navigation: any;
@@ -420,6 +420,7 @@ class SendToContact extends Component<
   checkRecordsHavingPrice = () => {
     const { accountsState, removeTransferDetails } = this.props;
     const { serviceType, selectedContact } = this.state;
+
     if (
       accountsState[serviceType].transfer.details &&
       accountsState[serviceType].transfer.details.length
@@ -681,6 +682,7 @@ class SendToContact extends Component<
           const contactName = `${item.selectedContact.displayedName}`
             .toLowerCase()
             .trim();
+
           recipients.push({
             id: contactName,
             address: null,
@@ -1399,7 +1401,7 @@ class SendToContact extends Component<
           snapPoints={[-50, hp('65%')]}
           renderContent={() => (
             <SendConfirmationContent
-              title={'Send Unsuccessful'}
+              title={'Sent Unsuccessful'}
               info={
                 'There seems to be a problem' +
                   '\n' +
