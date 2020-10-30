@@ -115,16 +115,10 @@ export default function NewWalletQuestion(props) {
   }, [isLoaderStart]);
 
   useEffect(() => {
-    if (
-      isInitialized
-      // exchangeRates &&
-      // balances.testBalance &&
-      // transactions.length > 0
-    ) {
+    if (isInitialized) {
       (loaderBottomSheet as any).current.snapTo(0);
-      // dispatch(accountsSynched(true)); // to switch the color of the amount on the account tiles at home
       dispatch(walletCheckIn()); // fetches exchange rates
-      props.navigation.navigate('HomeNav');
+      props.navigation.navigate('Main');
     }
   }, [isInitialized]);
 

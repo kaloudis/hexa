@@ -64,6 +64,7 @@ import AddNewDonationAccount from '../pages/Accounts/AddNewDonationAccount';
 import HomeStack from './stacks/home/HomeStack';
 import AccountDetailsStack from './stacks/account-details/AccountDetailsStack';
 import SendStack from './stacks/send/SendStack';
+import SwanIntegrationDemoScreen from '../pages/SwanIntegrationDemo/SwanIntegrationDemoScreen';
 
 
 const SetupNavigator = createStackNavigator(
@@ -109,7 +110,7 @@ const MODAL_ROUTES = [
   'Intermediate',
 ];
 
-const HomeNavigator = createStackNavigator(
+const MainNavigator = createStackNavigator(
   {
     Home: {
       screen: HomeStack,
@@ -183,6 +184,12 @@ const HomeNavigator = createStackNavigator(
         gesturesEnabled: false,
       },
     },
+    SwanIntegrationDemo: {
+      screen: SwanIntegrationDemoScreen,
+      navigationOptions: {
+        title: "Swan E2E Test",
+      },
+    },
   },
   {
     headerLayoutPreset: 'center',
@@ -217,7 +224,7 @@ const HomeNavigator = createStackNavigator(
 
 const Navigator = createSwitchNavigator({
   SetupNav: SetupNavigator,
-  HomeNav: HomeNavigator,
+  Main: MainNavigator,
 });
 
 export default createAppContainer(Navigator);

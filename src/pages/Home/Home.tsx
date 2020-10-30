@@ -10,13 +10,13 @@ import {
   Linking,
   Alert,
   Image,
-  BackHandler,
 } from 'react-native';
 import { Easing } from 'react-native-reanimated';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import DeviceInfo from 'react-native-device-info';
 import CustodianRequestRejectedModalContents from '../../components/CustodianRequestRejectedModalContents';
-import AddModalContents from '../../components/AddModalContents';
+import SmallHeaderModal from '../../components/SmallHeaderModal';
+import AddModalContents from '../../components/home/AddModalContents';
 import { AppState } from 'react-native';
 import * as RNLocalize from 'react-native-localize';
 import { BottomSheetView } from '@gorhom/bottom-sheet';
@@ -91,6 +91,7 @@ import defaultBottomSheetConfigs from '../../common/configs/BottomSheetConfigs';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { resetToHomeAction } from '../../navigation/actions/NavigationActions';
 import { Milliseconds } from '../../common/data/typealiases/UnitAliases';
+import addMenuItems, { HomeAddMenuItem, HomeAddMenuKind } from './AddMenuItems';
 
 export const BOTTOM_SHEET_OPENING_ON_LAUNCH_DELAY: Milliseconds = 800;
 
@@ -557,8 +558,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
               carouselAcc === DONATION_ACCOUNT
                 ? `Accept bitcoin`
                 : serviceType === REGULAR_ACCOUNT
-                ? 'User Checking Account'
-                : 'User Savings Account',
+                  ? 'User Checking Account'
+                  : 'User Savings Account',
             accountType: serviceType,
             subType: carouselAcc,
             bitcoinicon: require('../../assets/images/icons/icon_bitcoin_test.png'),
@@ -603,13 +604,20 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     const date = new Date();
     date.setHours(date.getHours() + Number(Config.NOTIFICATION_HOUR));
 
-    // console.log('DATE', date, Config.NOTIFICATION_HOUR, date.getTime());
-    await firebase.notifications().scheduleNotification(notification, {
-      fireDate: date.getTime(),
-      //repeatInterval: 'hour',
-    });
-
-    firebase.notifications().getScheduledNotifications();
+    await firebase
+      .notifications()
+      .scheduleNotification(notification, {
+        fireDate: date.getTime(),
+      })
+      .then(() => { })
+      .catch(
+        () => { },
+      );
+    firebase
+      .notifications()
+      .getScheduledNotifications()
+      .then(() => {
+      });
   };
 
   onAppStateChange = async (nextAppState) => {
@@ -634,7 +642,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           }
         },
       );
-    } catch (error) {}
+    } catch (error) { }
   };
 
   componentDidMount = () => {
@@ -760,14 +768,19 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     // Schedule the notification for 2hours on development and 2 weeks on Production in the future
     const date = new Date();
     date.setSeconds(date.getSeconds() + 1);
-    await firebase.notifications().scheduleNotification(notification, {
-      fireDate: date.getTime(),
-    });
+
+    await firebase
+      .notifications()
+      .scheduleNotification(notification, {
+        fireDate: date.getTime(),
+      })
+      .then(() => { })
+      .catch(() => { });
 
     firebase
       .notifications()
       .getScheduledNotifications()
-      .then(() => {});
+      .then(() => { });
   };
 
   componentDidUpdate = (prevProps) => {
@@ -892,7 +905,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     snapIndex: number | null = null,
   ) {
     this.openBottomSheetOnLaunchTimeout = setTimeout(() => {
-      this.openBottomSheet(kind, snapIndex);
+      this.openBottomSheet(kind, snapIndex);;
     }, BOTTOM_SHEET_OPENING_ON_LAUNCH_DELAY);
   }
 
@@ -962,7 +975,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
         Alert.alert(
           'Invalid deeplink',
           `Following deeplink could not be processed by Hexa:${config.APP_STAGE.toUpperCase()}, use Hexa:${
-            splits[3]
+          splits[3]
           }`,
         );
       } else {
@@ -1258,7 +1271,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
     let testBalance = accounts[TEST_ACCOUNT].service
       ? accounts[TEST_ACCOUNT].service.hdWallet.balances.balance +
-        accounts[TEST_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
+      accounts[TEST_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
       : 0;
 
     const testTransactions = accounts[TEST_ACCOUNT].service
@@ -1269,14 +1282,14 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
     let regularBalance = accounts[REGULAR_ACCOUNT].service
       ? accounts[REGULAR_ACCOUNT].service.hdWallet.balances.balance +
-        accounts[REGULAR_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
+      accounts[REGULAR_ACCOUNT].service.hdWallet.balances.unconfirmedBalance
       : 0;
 
     // regular derivative accounts
     for (const dAccountType of config.DERIVATIVE_ACC_TO_SYNC) {
       const derivativeAccount =
         accounts[REGULAR_ACCOUNT].service.hdWallet.derivativeAccounts[
-          dAccountType
+        dAccountType
         ];
       if (derivativeAccount && derivativeAccount.instance.using) {
         for (
@@ -1295,8 +1308,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
     let secureBalance = accounts[SECURE_ACCOUNT].service
       ? accounts[SECURE_ACCOUNT].service.secureHDWallet.balances.balance +
-        accounts[SECURE_ACCOUNT].service.secureHDWallet.balances
-          .unconfirmedBalance
+      accounts[SECURE_ACCOUNT].service.secureHDWallet.balances
+        .unconfirmedBalance
       : 0;
 
     // secure derivative accounts
@@ -1305,7 +1318,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
 
       const derivativeAccount =
         accounts[SECURE_ACCOUNT].service.secureHDWallet.derivativeAccounts[
-          dAccountType
+        dAccountType
         ];
 
       if (derivativeAccount && derivativeAccount.instance.using) {
@@ -1404,7 +1417,28 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
     this.closeBottomSheet();
   };
 
-  onPhoneNumberChange = () => {};
+  onPhoneNumberChange = () => { };
+
+  handleAddMenuItemSelection = ({ kind: itemKind }: HomeAddMenuItem) => {
+    switch (itemKind) {
+      case HomeAddMenuKind.BUY_BITCOIN_FROM_FAST_BITCOINS:
+        this.props.navigation.navigate('VoucherScanner');
+        this.closeBottomSheet();
+        break;
+      case HomeAddMenuKind.ADD_CONTACT:
+        this.setState(
+          { isLoadContacts: true },
+          () => {
+            this.openBottomSheet(BottomSheetKind.ADD_CONTACT_FROM_ADDRESS_BOOK);
+          }
+        );
+        break;
+      case HomeAddMenuKind.ADD_SWAN_ACCOUNT:
+        this.props.navigation.navigate('SwanIntegrationDemo');
+        this.closeBottomSheet();
+        break;
+    }
+  };
 
   handleBottomTabSelection = (tab: BottomTab) => {
     this.setState({ selectedBottomTab: tab });
@@ -1418,7 +1452,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
         onCodeScanned: this.processQRData,
       });
     } else if (tab === BottomTab.Add) {
-      this.openBottomSheet(BottomSheetKind.TAB_BAR_ADD_MENU);
+      this.openBottomSheet(BottomSheetKind.TAB_BAR_ADD_MENU);;
     }
   };
 
@@ -1506,7 +1540,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
                   if (contact) {
                     contactName = `${contact.firstName} ${
                       contact.lastName ? contact.lastName : ''
-                    }`
+                      }`
                       .toLowerCase()
                       .trim();
                   } else {
@@ -1572,7 +1606,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
             errorMessage: `Request your contact to send the request again with the correct wallet name or help them manually restore by going into Friends and Family > I am the Keeper of > Help Restore`,
           },
           () => {
-            this.openBottomSheet(BottomSheetKind.ERROR);
+            this.openBottomSheet(BottomSheetKind.ERROR);;
           },
         );
       } else {
@@ -1680,8 +1714,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
           if (res.data.releases.length) {
             let releaseNotes = res.data.releases.length
               ? res.data.releases.find((el) => {
-                  return el.build === value.info.split(' ')[1];
-                })
+                return el.build === value.info.split(' ')[1];
+              })
               : '';
             navigation.navigate('UpdateApp', {
               releaseData: [releaseNotes],
@@ -1740,9 +1774,9 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
         ) {
           let temp =
             asyncNotificationList[
-              asyncNotificationList.findIndex(
-                (value) => value.notificationId == element.notificationId,
-              )
+            asyncNotificationList.findIndex(
+              (value) => value.notificationId == element.notificationId,
+            )
             ];
           if (element.notificationType == 'release') {
             readStatus = readStatus;
@@ -1841,22 +1875,8 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
             <BottomSheetHeader title="Add" onPress={this.closeBottomSheet} />
 
             <AddModalContents
-              onPressElements={(type) => {
-                if (type == 'buyBitcoins') {
-                  navigation.navigate('VoucherScanner');
-                } else if (type == 'addContact') {
-                  this.setState(
-                    {
-                      isLoadContacts: true,
-                    },
-                    () => {
-                      this.openBottomSheet(
-                        BottomSheetKind.ADD_CONTACT_FROM_ADDRESS_BOOK,
-                      );
-                    },
-                  );
-                }
-              }}
+              menuItems={addMenuItems}
+              onItemSelected={this.handleAddMenuItemSelection}
             />
           </>
         );
@@ -1892,7 +1912,7 @@ class Home extends PureComponent<HomePropsTypes, HomeStateTypes> {
             }}
             onPressRejectSecret={() => {
               this.closeBottomSheet();
-              this.openBottomSheet(BottomSheetKind.CUSTODIAN_REQUEST_REJECTED);
+              this.openBottomSheet(BottomSheetKind.CUSTODIAN_REQUEST_REJECTED);;
             }}
           />
         );

@@ -7,7 +7,7 @@ import NoInternetModalContents from './src/components/NoInternetModalContents';
 import { useDispatch } from 'react-redux';
 import NetInfo from '@react-native-community/netinfo';
 import { getVersion, getBuildId } from 'react-native-device-info';
-import { setApiHeaders } from './src/services/api';
+import { setApiHeaders } from './src/networking/api';
 import firebase from 'react-native-firebase';
 import { updatePreference } from './src/store/actions/preferences';
 import usePreferencesState from './src/utils/hooks/state-selectors/preferences/UsePreferencesState';
