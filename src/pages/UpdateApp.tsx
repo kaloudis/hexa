@@ -6,7 +6,6 @@ import {
   Text,
   StyleSheet,
   Platform,
-  ActivityIndicator,
   SafeAreaView,
   StatusBar,
   Linking,
@@ -20,7 +19,6 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import Config from "react-native-config";
 import Octicons from 'react-native-vector-icons/Octicons';
 import DeviceInfo from 'react-native-device-info';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -40,8 +38,8 @@ export default function UpdateApp(props) {
   const releaseNumber = props.navigation.state.params.releaseNumber
     ? props.navigation.state.params.releaseNumber
     : '';
-  // console.log('releaseDataObj', releaseDataObj);
-  const [releaseNotes, setReleaseNotes] = useState([]);
+
+    const [releaseNotes, setReleaseNotes] = useState([]);
   const [isUpdateMandotary, setIsUpdateMandotary] = useState(false);
   const [releaseData, setReleaseData] = useState({});
   const [isUpdateInValid, setIsUpdateInValid] = useState(false);
@@ -56,14 +54,16 @@ export default function UpdateApp(props) {
       isOpenFromNotificationList &&
       releaseNumber
     ) {
-      // console.log("releaseDataObj[0]",releaseDataObj[0])
-      if(DeviceInfo.getBuildNumber() >= releaseNumber)
-      setIsUpdateInValid(true);
-      else
+      if (DeviceInfo.getBuildNumber() >= releaseNumber) {
+        setIsUpdateInValid(true);
+      } else {
         setIsUpdateInValid(false);
+      }
+
       if (releaseDataObj[0] && releaseDataObj[0].reminderLimit == 0) {
         setIsUpdateMandotary(true);
       }
+
       setReleaseData(releaseDataObj[0]);
     }
 
@@ -76,10 +76,6 @@ export default function UpdateApp(props) {
         await AsyncStorage.setItem('releaseCases', '');
         let releaseData;
         let releaseDataOld = releaseCasesValue;
-        // JSON.parse(
-        //   await AsyncStorage.getItem('releaseData'),
-        // );
-        // console.log('releaseDataOld', releaseDataOld);
         if (releaseDataObj[0] && releaseDataObj[0].reminderLimit > 0) {
           if (!releaseDataOld) {
             releaseData = {
@@ -129,7 +125,6 @@ export default function UpdateApp(props) {
 
   useEffect(() => {
     if (releaseData) {
-      // console.log("ReleaseData",releaseData);
       let tempReleaseNote = releaseData.releaseNotes
         ? Platform.OS == 'ios'
           ? releaseData.releaseNotes.ios
@@ -163,7 +158,6 @@ export default function UpdateApp(props) {
 
   const onClick = async (_ignoreClick, _remindMeLaterClick) => {
     let releaseCasesData;
-    let releaseCases = releaseCasesValue;
     //JSON.parse(await AsyncStorage.getItem('releaseCases'));
     // console.log('releaseCases', releaseCases);
     releaseCasesData = {

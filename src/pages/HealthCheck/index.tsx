@@ -14,9 +14,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Fonts from '../../common/Fonts';
 import Colors from '../../common/Colors';
 import CommonStyles from '../../common/Styles/Styles';
-import {
-  widthPercentageToDP as wp,
-} from 'react-native-responsive-screen';
+import { widthPercentageToDP } from 'react-native-responsive-screen';
 import { RFValue } from 'react-native-responsive-fontsize';
 import KnowMoreButton from '../../components/KnowMoreButton';
 import { useDispatch, useSelector } from 'react-redux';
@@ -110,34 +108,6 @@ export default function HealthCheck(props) {
     }
   };
 
-  //   const renderWalletBackupAndRecoveryContents = () => {
-  //     return (
-  //       <WalletBackupAndRecoveryContents
-  //         onPressManageBackup={() => {
-  //           WalletBackupAndRecoveryBottomSheet.current.snapTo(0);
-  //         }}
-  //         onSkip={() => {
-  //           WalletBackupAndRecoveryBottomSheet.current.snapTo(0);
-  //         }}
-  //         onStartBackup={() => {
-  //           WalletBackupAndRecoveryBottomSheet.current.snapTo(0);
-  //         }}
-  //       />
-  //     );
-  //   };
-
-  //   const renderWalletBackupAndRecoveryHeader = () => {
-  //     return (
-  //       <SmallHeaderModal
-  //         borderColor={Colors.blue}
-  //         headerColor={Colors.blue}
-  //         onPressHandle={() => {
-  //           WalletBackupAndRecoveryBottomSheet.current.snapTo(0);
-  //         }}
-  //       />
-  //     );
-  //   };
-
   const dispatch = useDispatch();
   const s3Service: S3Service = useSelector((state) => state.sss.service);
   useEffect(() => {
@@ -200,17 +170,6 @@ export default function HealthCheck(props) {
     }
   }, [overallHealth]);
 
-  // useEffect(() => {
-  //   // HC down-streaming
-  //   if (s3Service) {
-  //     const { healthCheckInitialized } = s3Service.sss;
-
-  //     if (healthCheckInitialized) {
-  //       dispatch(checkMSharesHealth());
-  //     }
-  //   }
-  // }, []);
-
   return (
     <View style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 0 }} />
@@ -234,7 +193,7 @@ export default function HealthCheck(props) {
           </TouchableOpacity>
           <TouchableOpacity
             style={{ marginLeft: 'auto', marginRight: 10 }}
-            onPress={() => {}}
+            onPress={() => { }}
           >
             <Image
               source={require('../../assets/images/icons/icon_settings1.png')}
@@ -286,11 +245,7 @@ export default function HealthCheck(props) {
             data={pageData}
             extraData={selectedType}
             renderItem={({ item }) => (
-              <View
-              // style={{
-              //   opacity: !selectedType || item.type == selectedType ? 1 : 0.5
-              // }}
-              >
+              <View>
                 <TouchableOpacity
                   onPress={() =>
                     props.navigation.navigate(item.route, {
@@ -356,18 +311,6 @@ export default function HealthCheck(props) {
             )}
           />
         </ScrollView>
-        {/* <BottomSheet
-          enabledInnerScrolling={true}
-          ref={WalletBackupAndRecoveryBottomSheet}
-          snapPoints={[
-            -50,
-            Platform.OS == 'ios' && DeviceInfo.hasNotch()
-              ? hp('90%')
-              : hp('90%'),
-          ]}
-          renderContent={renderWalletBackupAndRecoveryContents}
-          renderHeader={renderWalletBackupAndRecoveryHeader}
-        /> */}
       </View>
     </View>
   );
@@ -375,64 +318,9 @@ export default function HealthCheck(props) {
 
 const styles = StyleSheet.create({
   image: {
-    width: wp('5%'),
-    height: wp('5%'),
-    resizeMode: 'contain',
-  },
-  knowMoreButtonText: {
-    color: Colors.white,
-    fontFamily: Fonts.FiraSansRegular,
-    fontSize: RFValue(12),
-  },
-  shieldImage: {
-    width: wp('16%'),
-    height: wp('25%'),
-    resizeMode: 'contain',
-    marginLeft: 'auto',
-    marginRight: 20,
-  },
-  modalHeaderHandle: {
-    width: 50,
-    height: 5,
-    backgroundColor: Colors.borderColor,
-    borderRadius: 10,
-    alignSelf: 'center',
-    marginTop: 15,
-  },
-  modalHeader: {
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderTopWidth: 1,
-    height: 25,
-    width: '80%',
-    alignSelf: 'center',
-    borderColor: Colors.borderColor,
-  },
-  addressView: {
-    flex: 1,
-    backgroundColor: Colors.backgroundColor,
-    borderBottomLeftRadius: 8,
-    borderTopLeftRadius: 8,
-    height: 50,
-    paddingLeft: 15,
-    paddingRight: 15,
-    justifyContent: 'center',
-  },
-  addressText: {
-    fontSize: RFValue(13),
-    color: Colors.lightBlue,
-  },
-  copyIconView: {
-    width: 48,
-    height: 50,
-    backgroundColor: Colors.borderColor,
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: widthPercentageToDP(5),
+    height: widthPercentageToDP(5),
+    resizeMode: "contain",
   },
   manageBackupCard: {
     padding: 20,

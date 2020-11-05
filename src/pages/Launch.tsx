@@ -161,7 +161,7 @@ class Launch extends Component<HomePropsTypes, HomeStateTypes> {
               this.props.navigation.navigate('Login', { userKey });
             } else {
               const EmailToken = url.substr(url.lastIndexOf('/') + 1);
-              // console.log('EmailToken', EmailToken);
+
               this.props.navigation.navigate('SignUpDetails', { EmailToken });
             }
           }
@@ -206,7 +206,6 @@ class Launch extends Component<HomePropsTypes, HomeStateTypes> {
           ]}
           renderContent={() => (
             <ErrorModalContents
-              modalRef={this.errorBottomSheet}
               title={'Login error'}
               info={'Error while loging in, please try again'}
               proceedButtonText={'Open Setting'}

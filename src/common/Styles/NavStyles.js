@@ -22,6 +22,16 @@ const NavStyles = StyleSheet.create({
     color: Colors.blue,
     fontSize: RFValue(18),
     fontFamily: Fonts.FiraSansMedium,
+    textAlign: 'left',
+    marginHorizontal: 0,
+  },
+
+  modalHeaderInfoText: {
+    color: Colors.textColorGrey,
+    fontSize: RFValue(11),
+    fontFamily: Fonts.FiraSansRegular,
+    marginTop: 10,
+    flexWrap: 'wrap',
   },
 
   modalHeaderInfoText: {

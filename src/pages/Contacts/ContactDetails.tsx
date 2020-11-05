@@ -27,7 +27,7 @@ import Colors from '../../common/Colors';
 import Fonts from '../../common/Fonts';
 import { RFValue } from 'react-native-responsive-fontsize';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { nameToInitials } from '../../common/CommonFunctions';
+import { nameToInitials, isEmpty } from '../../common/CommonFunctions';
 import _ from 'underscore';
 import moment from 'moment';
 import {
@@ -145,7 +145,7 @@ interface ContactDetailsStateTypes {
   trustedContactHistory: any;
 }
 
-class ContactDetailsNew extends PureComponent<
+class ContactDetails extends PureComponent<
   ContactDetailsPropTypes,
   ContactDetailsStateTypes
   > {
@@ -316,43 +316,6 @@ class ContactDetailsNew extends PureComponent<
       });
     }
   };
-
-  // useEffect(() => {
-  //   if (Contact.firstName && SHARES_TRANSFER_DETAILS[index]) {
-  //     const contactName = `${Contact.firstName} ${
-  //       Contact.lastName ? Contact.lastName : ''
-  //     }`
-  //       .toLowerCase()
-  //       .trim();
-  //     console.log({ contactName });
-
-  //     if (contactName === 'secondary device') return;
-
-  //     if (!trustedContacts.tc.trustedContacts[contactName]) return;
-
-  //     createDeepLink();
-  //     const publicKey =
-  //       trustedContacts.tc.trustedContacts[contactName].publicKey;
-  //     setTrustedQR(
-  //       JSON.stringify({
-  //         isGuardian: true,
-  //         requester: WALLET_SETUP.walletName,
-  //         publicKey,
-  //         uploadedAt:
-  //           trustedContacts.tc.trustedContacts[contactName].ephemeralChannel
-  //             .initiatedAt,
-  //         type: 'trustedGuardian',
-  //         ver: DeviceInfo.getVersion(),
-  //       }),
-  //     );
-  //   }
-  // }, [
-  //   SHARES_TRANSFER_DETAILS[index],
-  //   Contact,
-  //   trustedContacts,
-  //   uploadMetaShare,
-  //   updateEphemeralChannelLoader,
-  // ]);
 
   onPressSend = () => {
     this.props.clearTransfer(REGULAR_ACCOUNT);
@@ -622,10 +585,6 @@ class ContactDetailsNew extends PureComponent<
     }
   };
 
-  isEmpty = (obj) => {
-    return Object.keys(obj).every((k) => !Object.keys(obj[k]).length);
-  };
-
   createGuardian = async () => {
     const {
       trustedContacts,
@@ -812,7 +771,7 @@ class ContactDetailsNew extends PureComponent<
   };
 
   SendShareModalFunction = () => {
-    if (!this.isEmpty(this.Contact)) {
+    if (!isEmpty(this.Contact)) {
       return (
         <SendShareModal
           contact={this.Contact ? this.Contact : null}
@@ -1398,7 +1357,7 @@ export default connect(mapStateToProps, {
   uploadRequestedShare,
   ErrorSending,
   removeTrustedContact,
-})(ContactDetailsNew);
+})(ContactDetails);
 
 const styles = StyleSheet.create({
   modalContainer: {

@@ -777,8 +777,8 @@ export default class TrustedContacts {
       const { updated, updatedLastSeens } = res.data;
       // console.log({ updatedLastSeens });
       if (Object.keys(updatedLastSeens).length) {
-        for (const contact of Object.values(this.trustedContacts)) {
-          const { trustedChannel } = contact;
+        for (const contactName of Object.keys(this.trustedContacts)) {
+          const { trustedChannel } = this.trustedContacts[contactName];
           if (trustedChannel) {
             const { publicKey, lastSeen } = updatedLastSeens[
               trustedChannel.address
@@ -786,6 +786,7 @@ export default class TrustedContacts {
             trustedChannel.data.forEach((subChan: TrustedData) => {
               if (subChan.publicKey === publicKey) {
                 subChan.lastSeen = lastSeen;
+                this.trustedContacts[contactName].lastSeen = lastSeen;
               }
             });
           }
@@ -853,12 +854,14 @@ export default class TrustedContacts {
       for (const { shareId, updatedAt, reshareVersion } of updates) {
         for (let index = 0; index < metaShares.length; index++) {
           if (metaShares[index] && metaShares[index].shareId === shareId) {
-            const currentReshareVersion =
-              healthCheckStatus[index].reshareVersion !== undefined
-                ? healthCheckStatus[index].reshareVersion
-                : 0;
+            if (healthCheckStatus[index]) {
+              const currentReshareVersion =
+                healthCheckStatus[index].reshareVersion !== undefined
+                  ? healthCheckStatus[index].reshareVersion
+                  : 0;
 
-            if (reshareVersion < currentReshareVersion) continue; // skipping health updation from previous keeper(while the share is still not removed from keeper's device)
+              if (reshareVersion < currentReshareVersion) continue; // skipping health updation from previous keeper(while the share is still not removed from keeper's device)
+            }
 
             healthCheckStatus[index] = {
               shareId,
@@ -880,6 +883,7 @@ export default class TrustedContacts {
           trustedChannel.data.forEach((subChan: TrustedData) => {
             if (subChan.publicKey === publicKey) {
               subChan.lastSeen = lastSeen;
+              this.trustedContacts[contactName].lastSeen = lastSeen;
 
               // update health via channel
               if (lastSeen > 0) {

@@ -114,27 +114,6 @@ import {
   postRecoveryChannelSyncWatcher,
 } from './sagas/trustedContacts';
 
-import {
-  fetchSwanTokenWatcher,
-  linkSwanWalletWatcher,
-} from './sagas/SwanIntegration';
-
-// const rootSaga = function*() {
-//   yield all([
-//     // database watchers
-//     fork(initDBWatcher),
-//     fork(fetchDBWatcher),
-//     fork(insertDBWatcher),
-
-//     // wallet setup watchers
-//     fork(initSetupWatcher),
-
-//     // accounts watchers
-//     fork(fetchAddrWatcher),
-//     fork(fetchBalanceWatcher),
-//     fork(fetchTransactionsWatcher)
-//   ]);
-// };
 
 const rootSaga = function* () {
   const sagas = [

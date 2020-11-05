@@ -1,13 +1,10 @@
-console.disableYellowBox = true;
-import React, { Component } from 'react';
+
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import Navigator from './src/navigation/Navigator';
 import { Provider } from 'react-redux';
 import makeStore from './src/store';
 import NoInternetModalContents from './src/components/NoInternetModalContents';
-import BottomSheet from 'reanimated-bottom-sheet';
-import {
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { useDispatch } from 'react-redux';
 import NetInfo from '@react-native-community/netinfo';
 import { getVersion, getBuildId } from 'react-native-device-info';
 import { setApiHeaders } from './src/networking/api';
@@ -17,6 +14,9 @@ import usePreferencesState from './src/utils/hooks/state-selectors/preferences/U
 import { BottomSheetModalProvider, useBottomSheetModal } from '@gorhom/bottom-sheet';
 import defaultBottomSheetConfigs from './src/common/configs/BottomSheetConfigs';
 import getActiveRouteName from './src/utils/navigation/GetActiveRouteName';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(true);
 
 export const URI_PREFIX = 'hexa://';
 

@@ -92,8 +92,7 @@ class AddNewAccount extends PureComponent<
       !prevProps.accounts[serviceType].donationAccount.settedup &&
       this.props.accounts[serviceType].donationAccount.settedup
     ) {
-      this.setState({ disableForm: false });
-      this.props.navigation.navigate('Accounts', {
+      this.props.navigation.navigate('AccountDetails', {
         serviceType,
         index: this.props.cardData.length - 1,
       });
@@ -194,16 +193,6 @@ class AddNewAccount extends PureComponent<
         }}
       />
     );
-  };
-
-  openLink = (url) => {
-    Linking.canOpenURL(url).then((supported) => {
-      if (supported) {
-        Linking.openURL(url);
-      } else {
-        // console.log("Don't know how to open URI: " + url);
-      }
-    });
   };
 
   render() {

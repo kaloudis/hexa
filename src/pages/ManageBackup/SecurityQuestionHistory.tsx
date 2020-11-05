@@ -18,8 +18,6 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { getIconByStatus } from './utils';
-import { useDispatch } from 'react-redux';
-import { checkMSharesHealth } from '../../store/actions/sss';
 import Colors from '../../common/Colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import ErrorModalContents from '../../components/ErrorModalContents';
@@ -35,8 +33,7 @@ import SmallHeaderModal from '../../components/SmallHeaderModal';
 import SecurityQuestionHelpContents from '../../components/Helper/SecurityQuestionHelpContents';
 
 const SecurityQuestionHistory = (props) => {
-  const [SelectedOption, setSelectedOption] = useState(0);
-  const [HelpBottomSheet, setHelpBottomSheet] = useState(React.createRef());
+  const [HelpBottomSheet] = useState(React.createRef());
   const [securityQuestionsHistory, setSecuirtyQuestionHistory] = useState([
     {
       id: 1,
@@ -69,7 +66,6 @@ const SecurityQuestionHistory = (props) => {
     'updateAutoHighlightFlags',
   );
   const next = props.navigation.getParam('next');
-  const dispatch = useDispatch();
 
   const renderSecurityQuestionContent = useCallback(() => {
     return (

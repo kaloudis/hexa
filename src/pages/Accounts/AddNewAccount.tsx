@@ -110,7 +110,7 @@ class AddNewAccount extends PureComponent<
       !prevProps.accounts[serviceType].donationAccount.settedup &&
       this.props.accounts[serviceType].donationAccount.settedup
     ) {
-      this.props.navigation.navigate('Accounts');
+      this.props.navigation.navigate('AccountDetails');
     }
   };
 
@@ -202,16 +202,6 @@ class AddNewAccount extends PureComponent<
         }}
       />
     );
-  };
-
-  openLink = (url) => {
-    Linking.canOpenURL(url).then((supported) => {
-      if (supported) {
-        Linking.openURL(url);
-      } else {
-        // console.log("Don't know how to open URI: " + url);
-      }
-    });
   };
 
   renderAccountDetailModalContent = () => {
@@ -518,7 +508,7 @@ class AddNewAccount extends PureComponent<
                   accountNumber,
                   this.state.accountName,
                 );
-                this.props.navigation.navigate('Accounts');
+                this.props.navigation.navigate('AccountDetails');
               }
             }}
           >

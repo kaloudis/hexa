@@ -62,9 +62,9 @@ import RecipientSendConfirmation from './RecipientSendConfirmation';
 import RadioButton from '../../components/RadioButton';
 import CustomPriorityContent from './CustomPriorityContent';
 import Toast from '../../components/Toast';
+import CurrencyKind from '../../common/data/enums/CurrencyKind';
 
 interface SendConfirmationStateTypes {
-  switchOn: boolean;
   CurrencyCode: string;
   totalAmount: any;
   sliderValue: any;
@@ -95,7 +95,7 @@ interface SendConfirmationPropsTypes {
   alternateTransferST2: any;
   transferST2: any;
   currencyCode: any;
-  currencyToggleValue: any;
+  currencyKind: CurrencyKind;
   averageTxFees: any;
 }
 class SendConfirmation extends Component<
@@ -127,12 +127,12 @@ class SendConfirmation extends Component<
 
     if (this.isSendMax) {
       setTimeout(() => {
-        this.onPrioritySelect('Medium Fee');
+        this.onPrioritySelect('Low Fee');
       }, 2);
     }
     this.viewRef = React.createRef();
+
     this.state = {
-      switchOn: true,
       CurrencyCode: 'USD',
       totalAmount: 0,
       sliderValue: 0,
@@ -462,30 +462,36 @@ class SendConfirmation extends Component<
   };
 
   setCurrencyCodeFromAsync = async () => {
-    let currencyToggleValueTmp = this.props.currencyToggleValue;
     let currencyCodeTmp = this.props.currencyCode;
+
     this.setState({
-      switchOn: currencyToggleValueTmp ? true : false,
       CurrencyCode: currencyCodeTmp ? currencyCodeTmp : 'USD',
     });
   };
 
   convertBitCoinToCurrency = (value) => {
-    const { switchOn, exchangeRates, CurrencyCode } = this.state;
-    return this.serviceType == TEST_ACCOUNT
-      ? UsNumberFormat(value)
-      : switchOn
-      ? UsNumberFormat(value)
-      : exchangeRates
-      ? ((value / 1e8) * exchangeRates[CurrencyCode].last).toFixed(2)
-      : null;
+    const { exchangeRates, CurrencyCode } = this.state;
+
+    if (
+      this.serviceType === TEST_ACCOUNT ||
+      this.props.currencyKind === CurrencyKind.BITCOIN
+    ) {
+      return UsNumberFormat(value);
+    } else if (exchangeRates !== undefined) {
+      return ((value / 1e8) * exchangeRates[CurrencyCode].last).toFixed(2);
+    } else {
+      return null;
+    }
   };
 
   getCorrectCurrencySymbol = () => {
-    const { switchOn, CurrencyCode } = this.state;
-    return this.serviceType == TEST_ACCOUNT
-      ? 't-sats'
-      : switchOn
+    const { CurrencyCode } = this.state;
+
+    if (this.serviceType == TEST_ACCOUNT) {
+      return 't-sats';
+    }
+
+    return this.props.currencyKind === CurrencyKind.BITCOIN
       ? 'sats'
       : CurrencyCode.toLocaleLowerCase();
   };
@@ -498,16 +504,16 @@ class SendConfirmation extends Component<
 
   render() {
     const {
-      switchOn,
       CurrencyCode,
       totalAmount,
       sliderValue,
       isConfirmDisabled,
       SelectedContactId,
       transfer,
-      loading,
     } = this.state;
-    const { navigation, exchangeRates } = this.props;
+    const { navigation, exchangeRates, currencyKind } = this.props;
+    const prefersBitcoin = currencyKind === CurrencyKind.BITCOIN;
+
     return (
       <View style={{ flex: 1 }}>
         <SafeAreaView style={{ flex: 0 }} />
@@ -585,7 +591,7 @@ class SendConfirmation extends Component<
               <Text style={styles.availableToSpendText}>
                 {this.serviceType == TEST_ACCOUNT
                   ? UsNumberFormat(this.spendableBalance)
-                  : switchOn
+                  : prefersBitcoin
                   ? UsNumberFormat(this.spendableBalance)
                   : exchangeRates
                   ? (
@@ -597,7 +603,7 @@ class SendConfirmation extends Component<
               <Text style={styles.textTsats}>
                 {this.serviceType == TEST_ACCOUNT
                   ? ' t-sats)'
-                  : switchOn
+                  : prefersBitcoin
                   ? ' sats)'
                   : ' ' + CurrencyCode.toLocaleLowerCase() + ' )'}
               </Text>
@@ -691,7 +697,7 @@ class SendConfirmation extends Component<
                 <Text style={styles.amountText}>
                   {this.serviceType == TEST_ACCOUNT
                     ? UsNumberFormat(totalAmount)
-                    : switchOn
+                    : prefersBitcoin
                     ? UsNumberFormat(totalAmount)
                     : exchangeRates
                     ? (
@@ -705,7 +711,7 @@ class SendConfirmation extends Component<
                   {/* {this.serviceType == TEST_ACCOUNT ? ' t-sats' : ' sats'} */}
                   {this.serviceType == TEST_ACCOUNT
                     ? ' t-sats'
-                    : switchOn
+                    : prefersBitcoin
                     ? ' sats'
                     : ' ' + CurrencyCode.toLocaleLowerCase()}
                 </Text>
@@ -781,27 +787,27 @@ class SendConfirmation extends Component<
                 </View>
               </View>
             ) : null}
-            <View style={styles.priorityTableContainer}>
-              <View
-                style={{
-                  ...styles.priorityDataContainer,
-                  justifyContent: 'flex-start',
-                }}
-              >
-                <RadioButton
-                  size={20}
-                  color={Colors.lightBlue}
-                  borderColor={Colors.borderColor}
-                  isChecked={this.state.sliderValueText.includes('Medium')}
-                  onpress={() => this.onPrioritySelect('Medium Fee')}
-                />
-                <Text style={{ ...styles.priorityTableText, marginLeft: 10 }}>
-                  Medium
-                </Text>
-              </View>
-              <View style={styles.priorityValueContainer}>
-                {!this.isSendMax ? (
-                  transfer &&
+            {!this.isSendMax ? (
+              <View style={styles.priorityTableContainer}>
+                <View
+                  style={{
+                    ...styles.priorityDataContainer,
+                    justifyContent: 'flex-start',
+                  }}
+                >
+                  <RadioButton
+                    size={20}
+                    color={Colors.lightBlue}
+                    borderColor={Colors.borderColor}
+                    isChecked={this.state.sliderValueText.includes('Medium')}
+                    onpress={() => this.onPrioritySelect('Medium Fee')}
+                  />
+                  <Text style={{ ...styles.priorityTableText, marginLeft: 10 }}>
+                    Medium
+                  </Text>
+                </View>
+                <View style={styles.priorityValueContainer}>
+                  {transfer &&
                   transfer.stage1 &&
                   transfer.stage1.txPrerequisites ? (
                     <Text style={styles.priorityTableText}>
@@ -821,51 +827,47 @@ class SendConfirmation extends Component<
                           10}{' '}
                       minutes */}
                     </Text>
-                  ) : null
-                ) : (
-                  <View style={[styles.priorityValueContainer]}>
-                    <Text style={styles.priorityTableText}>~2 hours</Text>
-                  </View>
-                )}
-              </View>
-              <View style={styles.priorityValueContainer}>
-                <Text style={styles.priorityTableText}>
-                  {this.convertBitCoinToCurrency(
-                    transfer.stage1 && transfer.stage1.txPrerequisites
-                      ? transfer.stage1.txPrerequisites['medium'].fee
-                      : '',
-                  )}
-                  {' ' + this.getCorrectCurrencySymbol()}
-                </Text>
-              </View>
-            </View>
-            {!this.isSendMax ? (
-              <View
-                style={{
-                  ...styles.priorityTableContainer,
-                  borderBottomWidth:
-                    this.state.customFeePerByte !== '' ? 0.5 : 0,
-                }}
-              >
-                <View
-                  style={{
-                    ...styles.priorityDataContainer,
-                    justifyContent: 'flex-start',
-                  }}
-                >
-                  <RadioButton
-                    size={20}
-                    color={Colors.lightBlue}
-                    borderColor={Colors.borderColor}
-                    isChecked={this.state.sliderValueText.includes('Low')}
-                    onpress={() => this.onPrioritySelect('Low Fee')}
-                  />
-                  <Text style={{ ...styles.priorityTableText, marginLeft: 10 }}>
-                    Low
-                  </Text>
+                  ) : null}
                 </View>
                 <View style={styles.priorityValueContainer}>
-                  {transfer &&
+                  <Text style={styles.priorityTableText}>
+                    {this.convertBitCoinToCurrency(
+                      transfer.stage1 && transfer.stage1.txPrerequisites
+                        ? transfer.stage1.txPrerequisites['medium'].fee
+                        : '',
+                    )}
+                    {' ' + this.getCorrectCurrencySymbol()}
+                  </Text>
+                </View>
+              </View>
+            ) : null}
+
+            <View
+              style={{
+                ...styles.priorityTableContainer,
+                borderBottomWidth: this.state.customFeePerByte !== '' ? 0.5 : 0,
+              }}
+            >
+              <View
+                style={{
+                  ...styles.priorityDataContainer,
+                  justifyContent: 'flex-start',
+                }}
+              >
+                <RadioButton
+                  size={20}
+                  color={Colors.lightBlue}
+                  borderColor={Colors.borderColor}
+                  isChecked={this.state.sliderValueText.includes('Low')}
+                  onpress={() => this.onPrioritySelect('Low Fee')}
+                />
+                <Text style={{ ...styles.priorityTableText, marginLeft: 10 }}>
+                  Low
+                </Text>
+              </View>
+              <View style={styles.priorityValueContainer}>
+                {!this.isSendMax ? (
+                  transfer &&
                   transfer.stage1 &&
                   transfer.stage1.txPrerequisites ? (
                     <Text style={styles.priorityTableText}>
@@ -884,20 +886,25 @@ class SendConfirmation extends Component<
                           10}{' '}
                       minutes */}
                     </Text>
-                  ) : null}
-                </View>
-                <View style={styles.priorityValueContainer}>
-                  <Text style={styles.priorityTableText}>
-                    {this.convertBitCoinToCurrency(
-                      transfer.stage1 && transfer.stage1.txPrerequisites
-                        ? transfer.stage1.txPrerequisites['low'].fee
-                        : '',
-                    )}
-                    {' ' + this.getCorrectCurrencySymbol()}
-                  </Text>
-                </View>
+                  ) : null
+                ) : (
+                  <View style={[styles.priorityValueContainer]}>
+                    <Text style={styles.priorityTableText}>~6.5 hours</Text>
+                  </View>
+                )}
               </View>
-            ) : null}
+              <View style={styles.priorityValueContainer}>
+                <Text style={styles.priorityTableText}>
+                  {this.convertBitCoinToCurrency(
+                    transfer.stage1 && transfer.stage1.txPrerequisites
+                      ? transfer.stage1.txPrerequisites['low'].fee
+                      : '',
+                  )}
+                  {' ' + this.getCorrectCurrencySymbol()}
+                </Text>
+              </View>
+            </View>
+
             {this.state.customFeePerByte !== '' && (
               <View
                 style={{
@@ -1127,7 +1134,7 @@ class SendConfirmation extends Component<
               (this.refs.SendSuccessBottomSheet as any).snapTo(0);
 
             this.props.clearTransfer(this.serviceType);
-            navigation.navigate('Accounts', {
+            navigation.navigate('AccountDetails', {
               serviceType: this.serviceType,
               index:
                 this.serviceType === TEST_ACCOUNT
@@ -1169,7 +1176,7 @@ class SendConfirmation extends Component<
                 //         : false,
                 //   })
 
-                navigation.navigate('Accounts', {
+                navigation.navigate('AccountDetails', {
                   serviceType: this.serviceType,
                   index: this.state.derivativeAccountDetails
                     ? 3
@@ -1190,7 +1197,7 @@ class SendConfirmation extends Component<
             // onPressHeader={() => {
             //   if (this.refs.SendSuccessBottomSheet as any)
             //     (this.refs.SendSuccessBottomSheet as any).snapTo(0);
-            //   navigation.navigate('Accounts');
+            //   navigation.navigate('AccountDetails');
             // }}
             />
           )}
@@ -1221,7 +1228,7 @@ class SendConfirmation extends Component<
                 this.props.clearTransfer(this.serviceType);
                 if (this.refs.SendUnSuccessBottomSheet as any)
                   (this.refs.SendUnSuccessBottomSheet as any).snapTo(0);
-                navigation.navigate('Accounts');
+                navigation.navigate('AccountDetails');
               }}
               isUnSuccess={true}
             />
@@ -1324,8 +1331,7 @@ const mapStateToProps = (state) => {
     accounts: idx(state, (_) => _.accounts) || [],
     WALLET_SETUP: idx(state, (_) => _.storage.database.WALLET_SETUP) || '',
     currencyCode: idx(state, (_) => _.preferences.currencyCode),
-    currencyToggleValue: idx(state, (_) => _.preferences.currencyToggleValue),
-    averageTxFees: idx(state, (_) => _.accounts.averageTxFees),
+    currencyKind: idx(state, (_) => _.preferences.currencyKind),
   };
 };
 

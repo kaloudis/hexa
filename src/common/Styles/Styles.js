@@ -67,4 +67,11 @@ export default StyleSheet.create({
     resizeMode: "contain",
     marginLeft: "auto",
   },
+
+  cardIconImage: {
+    width: 12,
+    height: 14,
+    resizeMode: "contain",
+    marginLeft: "auto",
+  },
 });
