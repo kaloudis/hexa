@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import config from '../HexaConfig';
 import { INotification, EncryptedImage } from './Interface';
-import { BH_AXIOS } from '../../services/api';
+import { BH_AXIOS } from '../../networking/api';
 import idx from 'idx';
 
 const { HEXA_ID } = config;
@@ -115,9 +115,9 @@ export default class Relay {
           receivers,
           notification,
         });
-        console.log({ res });
+        // console.log({ res });
       } catch (err) {
-        console.log({ err });
+        // console.log({ err });
         if (err.response) throw new Error(err.response.data.err);
         if (err.code) throw new Error(err.code);
       }
@@ -148,9 +148,9 @@ export default class Relay {
           donationId,
           txNote,
         });
-        console.log({ res });
+        // console.log({ res });
       } catch (err) {
-        console.log({ err });
+        // console.log({ err });
         if (err.response) throw new Error(err.response.data.err);
         if (err.code) throw new Error(err.code);
       }

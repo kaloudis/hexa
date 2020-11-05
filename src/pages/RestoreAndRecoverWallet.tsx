@@ -20,6 +20,15 @@ import BottomInfoBox from '../components/BottomInfoBox';
 import openLink from '../utils/OpenLink';
 
 const RestoreAndRecoverWallet = props => {
+  const openLink = (url) => {
+    Linking.canOpenURL(url).then(supported => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        // console.log("Don't know how to open URI: " + url);
+      }
+    });
+  }
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar backgroundColor={Colors.white} barStyle="dark-content" />

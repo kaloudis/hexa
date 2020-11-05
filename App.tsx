@@ -1,13 +1,16 @@
 console.disableYellowBox = true;
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { Component } from 'react';
 import Navigator from './src/navigation/Navigator';
 import { Provider } from 'react-redux';
 import makeStore from './src/store';
 import NoInternetModalContents from './src/components/NoInternetModalContents';
-import { useDispatch } from 'react-redux';
+import BottomSheet from 'reanimated-bottom-sheet';
+import {
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import NetInfo from '@react-native-community/netinfo';
 import { getVersion, getBuildId } from 'react-native-device-info';
-import { setApiHeaders } from './src/services/api';
+import { setApiHeaders } from './src/networking/api';
 import firebase from 'react-native-firebase';
 import { updatePreference } from './src/store/actions/preferences';
 import usePreferencesState from './src/utils/hooks/state-selectors/preferences/UsePreferencesState';

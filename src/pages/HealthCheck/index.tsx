@@ -100,7 +100,7 @@ export default function HealthCheck(props) {
     },
   ]);
 
-  const getIconByStatus = status => {
+  const getIconByStatus = (status) => {
     if (status == 'Ugly') {
       return require('../../assets/images/icons/icon_error_red.png');
     } else if (status == 'Bad') {
@@ -109,7 +109,6 @@ export default function HealthCheck(props) {
       return require('../../assets/images/icons/icon_check.png');
     }
   };
-
 
   //   const renderWalletBackupAndRecoveryContents = () => {
   //     return (
@@ -140,18 +139,18 @@ export default function HealthCheck(props) {
   //   };
 
   const dispatch = useDispatch();
-  const s3Service: S3Service = useSelector(state => state.sss.service);
+  const s3Service: S3Service = useSelector((state) => state.sss.service);
   useEffect(() => {
     //WalletBackupAndRecoveryBottomSheet.current.snapTo(1);
     if (!s3Service.sss.healthCheckInitialized) dispatch(initHealthCheck());
   }, []);
 
-  const { overallHealth } = useSelector(state => state.sss);
+  const { overallHealth } = useSelector((state) => state.sss);
 
   useEffect(() => {
     if (overallHealth) {
       const updatedPageData = [...pageData];
-      updatedPageData.forEach(data => {
+      updatedPageData.forEach((data) => {
         switch (data.title) {
           case 'Secondary Device':
             if (overallHealth.sharesInfo[0].shareStage === 'Good') {
@@ -201,16 +200,16 @@ export default function HealthCheck(props) {
     }
   }, [overallHealth]);
 
-  useEffect(() => {
-    // HC down-streaming
-    if (s3Service) {
-      const { healthCheckInitialized } = s3Service.sss;
+  // useEffect(() => {
+  //   // HC down-streaming
+  //   if (s3Service) {
+  //     const { healthCheckInitialized } = s3Service.sss;
 
-      if (healthCheckInitialized) {
-        dispatch(checkMSharesHealth());
-      }
-    }
-  }, []);
+  //     if (healthCheckInitialized) {
+  //       dispatch(checkMSharesHealth());
+  //     }
+  //   }
+  // }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -234,14 +233,13 @@ export default function HealthCheck(props) {
             </View>
           </TouchableOpacity>
           <TouchableOpacity
-            style={{
-              marginLeft: 'auto',
-              marginRight: 10,
-            }}
-            onPress={() => {
-            }}
+            style={{ marginLeft: 'auto', marginRight: 10 }}
+            onPress={() => {}}
           >
-            <Image source={require("../../assets/images/icons/icon_settings1.png")} style={styles.image} />
+            <Image
+              source={require('../../assets/images/icons/icon_settings1.png')}
+              style={styles.image}
+            />
           </TouchableOpacity>
         </View>
         <ScrollView>
@@ -377,9 +375,64 @@ export default function HealthCheck(props) {
 
 const styles = StyleSheet.create({
   image: {
-    width: wp("5%"),
-    height: wp("5%"),
-    resizeMode: "contain",
+    width: wp('5%'),
+    height: wp('5%'),
+    resizeMode: 'contain',
+  },
+  knowMoreButtonText: {
+    color: Colors.white,
+    fontFamily: Fonts.FiraSansRegular,
+    fontSize: RFValue(12),
+  },
+  shieldImage: {
+    width: wp('16%'),
+    height: wp('25%'),
+    resizeMode: 'contain',
+    marginLeft: 'auto',
+    marginRight: 20,
+  },
+  modalHeaderHandle: {
+    width: 50,
+    height: 5,
+    backgroundColor: Colors.borderColor,
+    borderRadius: 10,
+    alignSelf: 'center',
+    marginTop: 15,
+  },
+  modalHeader: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopWidth: 1,
+    height: 25,
+    width: '80%',
+    alignSelf: 'center',
+    borderColor: Colors.borderColor,
+  },
+  addressView: {
+    flex: 1,
+    backgroundColor: Colors.backgroundColor,
+    borderBottomLeftRadius: 8,
+    borderTopLeftRadius: 8,
+    height: 50,
+    paddingLeft: 15,
+    paddingRight: 15,
+    justifyContent: 'center',
+  },
+  addressText: {
+    fontSize: RFValue(13),
+    color: Colors.lightBlue,
+  },
+  copyIconView: {
+    width: 48,
+    height: 50,
+    backgroundColor: Colors.borderColor,
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   manageBackupCard: {
     padding: 20,

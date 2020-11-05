@@ -161,8 +161,7 @@ class Launch extends Component<HomePropsTypes, HomeStateTypes> {
               this.props.navigation.navigate('Login', { userKey });
             } else {
               const EmailToken = url.substr(url.lastIndexOf('/') + 1);
-
-              console.log('EmailToken', EmailToken);
+              // console.log('EmailToken', EmailToken);
               this.props.navigation.navigate('SignUpDetails', { EmailToken });
             }
           }
@@ -177,7 +176,7 @@ class Launch extends Component<HomePropsTypes, HomeStateTypes> {
   };
 
   render() {
-    console.log('lastSeen', this.props.lastSeen);
+    // console.log('lastSeen', this.props.lastSeen);
     return (
       <View style={styles.container}>
         <Video

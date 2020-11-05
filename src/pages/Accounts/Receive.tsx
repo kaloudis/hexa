@@ -287,7 +287,7 @@ export default function Receive(props) {
             `/${trustedContact.ephemeralChannel.initiatedAt}` +
             `/v${appVersion}`;
 
-          console.log({ otpDL });
+          // console.log({ otpDL });
           setReceiveLink(otpDL);
           setOTP(otp);
           setIsOTPType(true);
@@ -414,7 +414,7 @@ export default function Receive(props) {
           contactName,
         );
         if (res.status !== 200) {
-          console.log('Err occurred while generating derivative account');
+          // console.log('Err occurred while generating derivative account');
         } else {
           // refresh the account number
           accountNumber =

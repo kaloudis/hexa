@@ -14,6 +14,7 @@ import notificationsReducer from './reducers/notifications';
 import trustedContactsReducer from './reducers/trustedContacts';
 import { persistStore, persistReducer } from 'redux-persist';
 import preferencesReducer from './reducers/preferences';
+import swanIntegrationReducer from './reducers/SwanIntegration';
 import loaders from './reducers/loaders';
 
 const config = {
@@ -109,8 +110,31 @@ import {
   removeTrustedContactWatcher,
   syncLastSeensWatcher,
   syncTrustedChannelsWatcher,
+  syncLastSeensAndHealthWatcher,
+  postRecoveryChannelSyncWatcher,
 } from './sagas/trustedContacts';
 
+import {
+  fetchSwanTokenWatcher,
+  linkSwanWalletWatcher,
+} from './sagas/SwanIntegration';
+
+// const rootSaga = function*() {
+//   yield all([
+//     // database watchers
+//     fork(initDBWatcher),
+//     fork(fetchDBWatcher),
+//     fork(insertDBWatcher),
+
+//     // wallet setup watchers
+//     fork(initSetupWatcher),
+
+//     // accounts watchers
+//     fork(fetchAddrWatcher),
+//     fork(fetchBalanceWatcher),
+//     fork(fetchTransactionsWatcher)
+//   ]);
+// };
 
 const rootSaga = function* () {
   const sagas = [
@@ -194,7 +218,13 @@ const rootSaga = function* () {
     fetchTrustedChannelWatcher,
     trustedChannelsSetupSyncWatcher,
     syncLastSeensWatcher,
+    syncLastSeensAndHealthWatcher,
     syncTrustedChannelsWatcher,
+    postRecoveryChannelSyncWatcher,
+
+    // Swan Integration
+    fetchSwanTokenWatcher,
+    linkSwanWalletWatcher,
   ];
 
   yield all(
@@ -222,6 +252,7 @@ const rootReducer = combineReducers({
   notifications: notificationsReducer,
   trustedContacts: trustedContactsReducer,
   preferences: preferencesReducer,
+  swanIntegration: swanIntegrationReducer,
   loaders,
 });
 

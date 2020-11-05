@@ -34,9 +34,9 @@ import KnowMoreButton from '../../components/KnowMoreButton';
 import SmallHeaderModal from '../../components/SmallHeaderModal';
 import SecurityQuestionHelpContents from '../../components/Helper/SecurityQuestionHelpContents';
 
-const SecurityQuestionHistory = props => {
-  const [] = useState(0);
-  const [HelpBottomSheet] = useState(React.createRef());
+const SecurityQuestionHistory = (props) => {
+  const [SelectedOption, setSelectedOption] = useState(0);
+  const [HelpBottomSheet, setHelpBottomSheet] = useState(React.createRef());
   const [securityQuestionsHistory, setSecuirtyQuestionHistory] = useState([
     {
       id: 1,
@@ -109,7 +109,7 @@ const SecurityQuestionHistory = props => {
         isIgnoreButton={false}
         onPressProceed={() => {
           (HealthCheckSuccessBottomSheet as any).current.snapTo(0);
-          dispatch(checkMSharesHealth());
+          // dispatch(checkMSharesHealth());
           props.navigation.goBack();
         }}
         bottomImage={require('../../assets/images/icons/sendSuccess.png')}
@@ -128,13 +128,13 @@ const SecurityQuestionHistory = props => {
     );
   }, []);
 
-  const sortedHistory = history => {
-    const currentHistory = history.filter(element => {
+  const sortedHistory = (history) => {
+    const currentHistory = history.filter((element) => {
       if (element.date) return element;
     });
 
     const sortedHistory = _.sortBy(currentHistory, 'date');
-    sortedHistory.forEach(element => {
+    sortedHistory.forEach((element) => {
       element.date = moment(element.date)
         .utc()
         .local()
@@ -144,7 +144,7 @@ const SecurityQuestionHistory = props => {
     return sortedHistory;
   };
 
-  const updateHistory = securityQuestionHistory => {
+  const updateHistory = (securityQuestionHistory) => {
     const updatedSecurityQuestionsHistory = [...securityQuestionsHistory];
     if (securityQuestionHistory.created)
       updatedSecurityQuestionsHistory[0].date = securityQuestionHistory.created;
@@ -209,9 +209,10 @@ const SecurityQuestionHistory = props => {
         titleClicked={() => {
           if (HelpBottomSheet.current)
             (HelpBottomSheet as any).current.snapTo(0);
-        }} />
+        }}
+      />
     );
-  }
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>

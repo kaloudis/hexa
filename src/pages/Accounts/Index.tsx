@@ -474,7 +474,7 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
     const { presentCarouselData, serviceType } = this.state;
     if (presentCarouselData && presentCarouselData.derivativeAccountDetails) {
       const { derivativeAccountDetails } = presentCarouselData;
-      console.log({ derivativeAccountDetails });
+      // console.log({ derivativeAccountDetails });
       if (derivativeAccountDetails.type === DONATION_ACCOUNT)
         this.props.syncViaXpubAgent(
           serviceType,
@@ -507,7 +507,7 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
     // const storedAverageTxFees = JSON.parse(
     //   await AsyncStorage.getItem('storedAverageTxFees'),
     // );
-    console.log({ storedAverageTxFees });
+    // console.log({ storedAverageTxFees });
 
     const network = [REGULAR_ACCOUNT, SECURE_ACCOUNT].includes(serviceType)
       ? 'MAINNET'
@@ -520,7 +520,7 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
         return;
       }
     }
-    console.log('Fetching average fee...', network);
+    // console.log('Fetching average fee...', network);
     const averageTxFees = await instance.averageTransactionFee();
     this.setState({ averageTxFees: averageTxFees });
     this.props.setAverageTxFee({
