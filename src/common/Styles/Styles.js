@@ -43,7 +43,8 @@ export default StyleSheet.create({
     fontSize: RFValue(21),
     marginRight: 5
   },
-  homepageAmountUnitText: {
+  homepageAmountUnitText:
+  {
     fontFamily: Fonts.FiraSansRegular,
     fontSize: RFValue(11),
     marginBottom: 3
@@ -55,9 +56,15 @@ export default StyleSheet.create({
     marginBottom: wp('1%'),
     resizeMode: 'contain'
   },
-
   rootView: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: 'white'
+  },
+
+  cardIconImage: {
+    width: 12,
+    height: 14,
+    resizeMode: "contain",
+    marginLeft: "auto",
   },
 });

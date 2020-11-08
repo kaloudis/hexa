@@ -1,7 +1,6 @@
 import { applyMiddleware, createStore, combineReducers } from 'redux';
 import { AsyncStorage as storage } from 'react-native';
 import thunk from 'redux-thunk';
-import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 import { call, all, spawn } from 'redux-saga/effects';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -15,7 +14,6 @@ import notificationsReducer from './reducers/notifications';
 import trustedContactsReducer from './reducers/trustedContacts';
 import { persistStore, persistReducer } from 'redux-persist';
 import preferencesReducer from './reducers/preferences';
-import swanIntegrationReducer from './reducers/SwanIntegration';
 import loaders from './reducers/loaders';
 
 const config = {
@@ -40,7 +38,6 @@ import {
 } from './sagas/setupAndAuth';
 
 import {
-  // fetchAddrWatcher,
   fetchBalanceWatcher,
   fetchTransactionsWatcher,
   transferST1Watcher,
@@ -50,7 +47,6 @@ import {
   accumulativeTxAndBalWatcher,
   accountsSyncWatcher,
   fetchBalanceTxWatcher,
-  exchangeRateWatcher,
   alternateTransferST2Watcher,
   generateSecondaryXprivWatcher,
   resetTwoFAWatcher,
@@ -98,7 +94,6 @@ import {
 
 import {
   updateFCMTokensWatcher,
-  // sendNotificationWatcher,
   fetchNotificationsWatcher,
 } from './sagas/notifications';
 
@@ -113,31 +108,9 @@ import {
   removeTrustedContactWatcher,
   syncLastSeensWatcher,
   syncTrustedChannelsWatcher,
-  syncLastSeensAndHealthWatcher,
+  walletCheckInWatcher,
   postRecoveryChannelSyncWatcher,
 } from './sagas/trustedContacts';
-
-import {
-  fetchSwanTokenWatcher,
-  linkSwanWalletWatcher,
-} from './sagas/SwanIntegration';
-
-// const rootSaga = function*() {
-//   yield all([
-//     // database watchers
-//     fork(initDBWatcher),
-//     fork(fetchDBWatcher),
-//     fork(insertDBWatcher),
-
-//     // wallet setup watchers
-//     fork(initSetupWatcher),
-
-//     // accounts watchers
-//     fork(fetchAddrWatcher),
-//     fork(fetchBalanceWatcher),
-//     fork(fetchTransactionsWatcher)
-//   ]);
-// };
 
 const rootSaga = function* () {
   const sagas = [
@@ -155,7 +128,6 @@ const rootSaga = function* () {
     changeAuthCredWatcher,
 
     // accounts watchers
-    // fetchAddrWatcher,
     fetchBalanceWatcher,
     fetchTransactionsWatcher,
     fetchBalanceTxWatcher,
@@ -166,7 +138,6 @@ const rootSaga = function* () {
     testcoinsWatcher,
     accumulativeTxAndBalWatcher,
     accountsSyncWatcher,
-    exchangeRateWatcher,
     generateSecondaryXprivWatcher,
     resetTwoFAWatcher,
     removeTwoFAWatcher,
@@ -211,7 +182,6 @@ const rootSaga = function* () {
     // Notifications
     updateFCMTokensWatcher,
     fetchNotificationsWatcher,
-    // sendNotificationWatcher,
 
     // Trusted Contacts
     initializedTrustedContactWatcher,
@@ -223,13 +193,9 @@ const rootSaga = function* () {
     fetchTrustedChannelWatcher,
     trustedChannelsSetupSyncWatcher,
     syncLastSeensWatcher,
-    syncLastSeensAndHealthWatcher,
+    walletCheckInWatcher,
     syncTrustedChannelsWatcher,
     postRecoveryChannelSyncWatcher,
-
-    // Swan Integration
-    fetchSwanTokenWatcher,
-    linkSwanWalletWatcher,
   ];
 
   yield all(
@@ -257,19 +223,20 @@ const rootReducer = combineReducers({
   notifications: notificationsReducer,
   trustedContacts: trustedContactsReducer,
   preferences: preferencesReducer,
-  swanIntegration: swanIntegrationReducer,
   loaders,
 });
 
-const sagaMiddleware = createSagaMiddleware();
+export default function makeStore() {
+  const sagaMiddleware = createSagaMiddleware();
+  const reducers = persistReducer(config, rootReducer);
+  const storeMiddleware = composeWithDevTools(
+    applyMiddleware(sagaMiddleware, thunk),
+  );
 
-const reducers = persistReducer(config, rootReducer);
+  const store = createStore(reducers, storeMiddleware);
 
-const store = createStore(
-  reducers,
-  composeWithDevTools(applyMiddleware(sagaMiddleware, thunk)),
-);
-sagaMiddleware.run(rootSaga);
-const persistor = persistStore(store);
+  persistStore(store);
+  sagaMiddleware.run(rootSaga);
 
-export { store, Provider, persistor };
+  return store;
+}
