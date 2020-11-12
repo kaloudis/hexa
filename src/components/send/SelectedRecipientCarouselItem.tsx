@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import ImageStyles from '../../common/Styles/ImageStyles';
 import HeadingStyles from '../../common/Styles/HeadingStyles';
 import Colors from '../../common/Colors';
@@ -10,8 +10,8 @@ import RecipientKind from '../../common/data/enums/RecipientKind';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { widthPercentageToDP } from 'react-native-responsive-screen';
 import ContactAvatar from '../ContactAvatar';
-import useFormattedAmountText from '../../utils/hooks/formatting/UseFormattedAmountText';
 import useFormattedUnitText from '../../utils/hooks/formatting/UseFormattedUnitText';
+import CurrencyKind from '../../common/data/enums/CurrencyKind';
 
 
 export type Props = {
@@ -25,8 +25,7 @@ const SelectedRecipientCarouselItem: React.FC<Props> = ({
   onRemove,
   containerStyle = {},
 }: Props) => {
- // const amountText = useFormattedAmountText(Number(amount) || 0);
-  const unitText = useFormattedUnitText();
+  const unitText = useFormattedUnitText({ currencyKind: CurrencyKind.FIAT });
 
   return (
     <View style={{ ...styles.rootContainer, ...containerStyle }}>
