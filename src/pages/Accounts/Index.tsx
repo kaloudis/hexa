@@ -41,6 +41,7 @@ import {
   SUB_PRIMARY_ACCOUNT,
 } from '../../common/constants/serviceTypes';
 import {
+  switchLoader,
   fetchBalance,
   fetchTransactions,
   getTestcoins,
@@ -48,9 +49,9 @@ import {
   fetchDerivativeAccXpub,
   fetchDerivativeAccBalTx,
   fetchDerivativeAccAddress,
-  setAverageTxFee,
   syncViaXpubAgent,
 } from '../../store/actions/accounts';
+import { setAutoAccountSync } from '../../store/actions/loaders';
 import {
   setTestAccountHelperDone,
   setTransactionHelper,
@@ -118,23 +119,24 @@ interface AccountsPropsTypes {
   fetchBalance: any;
   fetchTransactions: any;
   getTestcoins: any;
+  switchLoader: any;
   fetchBalanceTx: any;
+  setAutoAccountSync: any;
   syncViaXpubAgent: any;
+  averageTxFees: any;
   fetchDerivativeAccXpub: any;
   fetchDerivativeAccBalTx: any;
   fetchDerivativeAccAddress: any;
   service: any;
-  balanceTxLoading: any;
-  derivativeBalanceTxLoading: any;
   accounts: any;
   FBTCAccountData: any;
+  autoAccountSync: any;
   currencyCode: any;
   currencyToggleValue: any;
   setTestAccountHelperDone: any;
   isTestHelperDoneValue: any;
   setTransactionHelper: any;
   isTransactionHelperDoneValue: any;
-  setAverageTxFee: any;
   currencyKind: CurrencyKind;
   currencyKindSet: (kind: CurrencyKind) => void;
 }
@@ -143,8 +145,6 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
   sliderWidth: any;
   currencyCode: any;
   wallet: any;
-  balanceTxLoading: any;
-  derivativeBalanceTxLoading: any;
   carousel: any;
   constructor(props) {
     super(props);
@@ -219,38 +219,36 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
   }
 
   componentDidMount = () => {
+    
     let { serviceType } = this.state;
     let { accounts } = this.props;
+    // setting these properties to true if they are false. true should be the starting state for these
+    // properties else the account refresh can get stuck with loader displaying all the time
+    if (accounts[serviceType].loading.balanceTx) this.props.switchLoader(serviceType, 'balanceTx');
+    if(accounts[serviceType].loading.derivativeBalanceTx) this.props.switchLoader(serviceType, 'derivativeBalanceTx');
+
     this.updateCarouselData();
-    // this.setState({ spendableBalance: this.props.navigation.state.params
-    //   ? this.props.navigation.getParam('spendableBalance') : 0})
 
     this.getBalance();
-    this.balanceTxLoading = accounts[serviceType].loading.balanceTx;
-    this.derivativeBalanceTxLoading =
-      accounts[serviceType].loading.derivativeBalanceTx;
+  
     const service = accounts[serviceType].service;
     this.wallet =
       this.props.navigation.getParam('serviceType') === SECURE_ACCOUNT
         ? service.secureHDWallet
         : service.hdWallet;
-    this.setAverageTransactionFees();
+    this.getAverageTxFees(); // sets the averageTx fee
     this.checkFastBitcoin();
-
-    // if (this.wallet.transactions.transactionDetails.length) {
-    //   this.wallet.transactions.transactionDetails.sort(function (left, right) {
-    //     return moment.utc(right.date).unix() - moment.utc(left.date).unix();
-    //   });
-    // }
 
     this.setCurrencyCodeFromAsync();
     InteractionManager.runAfterInteractions(() => {
       this.setState({ is_initiated: true });
+      console.log('currencyCode interaction manager completed!')
     });
 
     if (this.state.showLoader) {
       // after all interactions are done , loader need to be removed
       InteractionManager.runAfterInteractions(() => {
+        console.log('Loader interaction manager completed!')
         this.setState({ showLoader: false });
         return;
       });
@@ -260,6 +258,10 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
     } else {
       return;
     }
+
+    setTimeout(() => {
+      this.autoAccountRefresh();
+    }, 2);
   };
 
   updateCarouselData = (dontSlide?) => {
@@ -462,70 +464,59 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
     }
   };
 
+
+
+
   refreshAccountBalance = () => {
     const { presentCarouselData, serviceType } = this.state;
     if (presentCarouselData && presentCarouselData.derivativeAccountDetails) {
       const { derivativeAccountDetails } = presentCarouselData;
-      // console.log({ derivativeAccountDetails });
+      
       if (derivativeAccountDetails.type === DONATION_ACCOUNT)
         this.props.syncViaXpubAgent(
           serviceType,
           derivativeAccountDetails.type,
           derivativeAccountDetails.number,
         );
-      else
+      else  
         this.props.fetchDerivativeAccBalTx(
           serviceType,
           derivativeAccountDetails.type,
           derivativeAccountDetails.number,
         );
+
+      this.props.setAutoAccountSync(derivativeAccountDetails.type);
     } else {
-      this.props.fetchBalanceTx(serviceType, {
-        loader: true,
-        syncTrustedDerivative:
+        this.props.fetchBalanceTx(serviceType, {
+          loader: true,
+          syncTrustedDerivative:
           serviceType === REGULAR_ACCOUNT || serviceType === SECURE_ACCOUNT
             ? true
             : false,
       });
+      this.props.setAutoAccountSync(serviceType);
     }
   };
 
-  setAverageTransactionFees = async () => {
-    let { serviceType } = this.state;
-    let { accounts } = this.props;
-    const service = accounts[serviceType].service;
-    const instance = service.hdWallet || service.secureHDWallet;
-    const storedAverageTxFees = this.props.averageTxFees;
-    // const storedAverageTxFees = JSON.parse(
-    //   await AsyncStorage.getItem('storedAverageTxFees'),
-    // );
-    // console.log({ storedAverageTxFees });
-
-    const network = [REGULAR_ACCOUNT, SECURE_ACCOUNT].includes(serviceType)
-      ? 'MAINNET'
-      : 'TESTNET';
-    if (storedAverageTxFees && storedAverageTxFees[network]) {
-      const { averageTxFees, lastFetched } = storedAverageTxFees[network];
-      if (Date.now() - lastFetched < 1800000 && instance.feeRates) {
-        // maintaining a half an hour difference b/w fetches
-        this.setState({ averageTxFees: averageTxFees });
-        return;
-      }
+  autoAccountRefresh = () => {
+    // refreshes the account once per-session (non-carousel swipe)
+    const { presentCarouselData, serviceType } = this.state;
+    let accountType;
+    if (presentCarouselData && presentCarouselData.derivativeAccountDetails) {
+      accountType = presentCarouselData.derivativeAccountDetails.type;
+    } else {
+      accountType = serviceType;
     }
-    // console.log('Fetching average fee...', network);
-    const averageTxFees = await instance.averageTransactionFee();
-    this.setState({ averageTxFees: averageTxFees });
-    this.props.setAverageTxFee({
-      ...storedAverageTxFees,
-      [network]: { averageTxFees, lastFetched: Date.now() },
-    });
-    // await AsyncStorage.setItem(
-    //   'storedAverageTxFees',
-    //   JSON.stringify({
-    //     serviceType: { averageTxFees, lastFetched: Date.now() },
-    //   }),
-    // );
+    const { autoAccountSync } = this.props;
+    if (autoAccountSync && autoAccountSync[accountType])
+      // already synched
+      return;
+    else {
+      this.refreshAccountBalance();
+      this.props.setAutoAccountSync(accountType);
+    }
   };
+
 
   setCurrencyCodeFromAsync = async () => {
     let currencyCodeTmp = this.props.currencyCode;
@@ -553,16 +544,10 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
       this.props.accounts[this.state.serviceType].service
     ) {
       this.getBalance();
-      this.balanceTxLoading = this.props.accounts[
-        this.state.serviceType
-      ].loading.balanceTx;
-      this.derivativeBalanceTxLoading = this.props.accounts[
-        this.state.serviceType
-      ].loading.derivativeBalanceTx;
     }
 
     if (prevState.serviceType !== this.state.serviceType) {
-      this.setAverageTransactionFees();
+      this.getAverageTxFees();
     }
 
     if (prevProps.accounts !== this.props.accounts) {
@@ -595,7 +580,6 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
 
   getServiceType = (serviceType, index?) => {
     if (!serviceType) return;
-    //console.log("presentCarouselData getServiceType", this.state.presentCarouselData, index, this.state.carouselData);
 
     if (this.carousel.current as any)
       (this.carousel.current as any).snapToItem(index, true, false);
@@ -985,10 +969,8 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
     )
       ? 'MAINNET'
       : 'TESTNET';
-    const averageTxFees = idx(
-      this.props.averageTxFees,
-      (_) => _[network].averageTxFees,
-    );
+    const averageTxFees = idx(this.props.averageTxFees, (_) => _[network]);
+    this.setState({ averageTxFees });
     return averageTxFees;
   };
 
@@ -1009,11 +991,11 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
       transactions,
       spendableBalance,
       carouselData,
+      averageTxFees,
     } = this.state;
 
     const { exchangeRates, accounts } = this.props;
 
-    const averageTxFees = this.getAverageTxFees();
     return (
       <View style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
         <SafeAreaView style={{ flex: 0 }} />
@@ -1097,8 +1079,7 @@ class Accounts extends Component<AccountsPropsTypes, AccountsStateTypes> {
               refreshControl={
                 <RefreshControl
                   refreshing={
-                    accounts[serviceType].loading.balanceTx ||
-                    accounts[serviceType].loading.derivativeBalanceTx
+                    accounts[serviceType].loading.balanceTx
                   }
                   onRefresh={this.refreshAccountBalance}
                 />
@@ -1929,6 +1910,7 @@ const mapStateToProps = (state) => {
       (_) => _.preferences.isTransactionHelperDoneValue,
     ),
     averageTxFees: idx(state, (_) => _.accounts.averageTxFees),
+    autoAccountSync: idx(state, (_) => _.loaders.autoAccountSync),
   };
 };
 
@@ -1937,6 +1919,7 @@ export default withNavigationFocus(
     fetchBalance,
     fetchTransactions,
     getTestcoins,
+    switchLoader,
     fetchBalanceTx,
     syncViaXpubAgent,
     fetchDerivativeAccXpub,
@@ -1945,7 +1928,7 @@ export default withNavigationFocus(
     currencyKindSet,
     setTestAccountHelperDone,
     setTransactionHelper,
-    setAverageTxFee,
+    setAutoAccountSync,
   })(Accounts),
 );
 

@@ -9,6 +9,9 @@ import LastSeenActiveIndicator from '../LastSeenActiveIndicator';
 import RecipientKind from '../../common/data/enums/RecipientKind';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { widthPercentageToDP } from 'react-native-responsive-screen';
+import ContactAvatar from '../ContactAvatar';
+import useFormattedAmountText from '../../utils/hooks/formatting/UseFormattedAmountText';
+import useFormattedUnitText from '../../utils/hooks/formatting/UseFormattedUnitText';
 
 
 export type Props = {
@@ -22,17 +25,15 @@ const SelectedRecipientCarouselItem: React.FC<Props> = ({
   onRemove,
   containerStyle = {},
 }: Props) => {
+ // const amountText = useFormattedAmountText(Number(amount) || 0);
+  const unitText = useFormattedUnitText();
 
   return (
     <View style={{ ...styles.rootContainer, ...containerStyle }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={styles.circledAvatarContainer}>
 
-          <Image
-            source={recipient.avatarImageSource}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode={'contain'}
-          />
+          <ContactAvatar contact={recipient} />
 
           {recipient.kind == RecipientKind.CONTACT && (
             <LastSeenActiveIndicator
@@ -44,7 +45,7 @@ const SelectedRecipientCarouselItem: React.FC<Props> = ({
 
         <View>
           <Text style={styles.titleText}>{recipient.displayedName}</Text>
-          <Text style={styles.amountText}>{`${recipient.availableBalance} Sats`}</Text>
+          <Text style={styles.amountText}>{recipient.availableBalance} {unitText}</Text>
         </View>
       </View>
 
