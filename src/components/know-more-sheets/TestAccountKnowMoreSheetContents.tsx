@@ -18,7 +18,7 @@ import { AppBottomSheetTouchableWrapper } from '../AppBottomSheetTouchableWrappe
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import openLink from '../../utils/OpenLink';
 
-export default function TestAccountHelpContents(props) {
+export default function TestAccountKnowMoreSheetContents(props) {
   const scrollViewRef = useRef<ScrollView>();
 
   return (
