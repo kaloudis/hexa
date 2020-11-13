@@ -14,8 +14,9 @@ import AccountSettingsEditVisibilityScreen from '../../../pages/Accounts/Account
 import AccountSettingsMergeAccountShellsScreen from '../../../pages/Accounts/AccountSettings/MergeAccountShellsScreen';
 import defaultStackScreenNavigationOptions from '../../options/DefaultStackScreenNavigationOptions';
 import SmallNavHeaderCloseButton from '../../../components/navigation/SmallNavHeaderCloseButton';
-import SendStack from '../send/SendStack';
+import SendStack from '../send/_Old_SendStack';
 import SmallNavHeaderBackButton from '../../../components/navigation/SmallNavHeaderBackButton';
+import SubAccountTFAHelpScreen from '../../../pages/Accounts/SubAccountTFAHelpScreen';
 
 
 const SubAccountSettingsStack = createStackNavigator(

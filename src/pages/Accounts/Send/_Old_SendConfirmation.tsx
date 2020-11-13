@@ -158,6 +158,7 @@ class SendConfirmation extends Component<
       transfer: accounts[this.serviceType].transfer,
       loading: accounts[this.serviceType].loading,
     });
+
     this.onChangeInTransfer();
     this.setCurrencyCodeFromAsync();
   };
@@ -221,6 +222,7 @@ class SendConfirmation extends Component<
 
   onChangeInTransfer = () => {
     let { transfer } = this.state;
+
     if (transfer.details) {
       let totalAmount = 0;
       transfer.details.map((item) => {
@@ -246,8 +248,8 @@ class SendConfirmation extends Component<
       }
 
       this.sendNotifications();
-
       this.storeTrustedContactsHistory(transfer.details);
+
       if (this.state.derivativeAccountDetails) {
         if (this.state.derivativeAccountDetails.type === DONATION_ACCOUNT)
           this.props.syncViaXpubAgent(
@@ -271,15 +273,23 @@ class SendConfirmation extends Component<
               : false,
         });
       }
+
       setTimeout(() => {
         (this.refs.SendSuccessBottomSheet as any).snapTo(1);
       }, 10);
+
     } else if (!transfer.txid && transfer.executed === 'ST2') {
+      // 📝 The idea seems to be that this code is reached when an "ST2" send has failed.
+
       this.props.navigation.navigate('TwoFAToken', {
         serviceType: this.serviceType,
         recipientAddress: '',
         onTransactionSuccess: this.onTransactionSuccess,
       });
+
+      // presentBottomSheet(
+      //   // <OTPAuthenticationSheet
+      // )
     }
   };
 

@@ -85,7 +85,7 @@ interface SendPropsTypes {
   trustedContactsService: TrustedContactsService;
   accountsState: any; // TODO: Strongly type this
   trustedContactsInfo: any;
-  isTwoFASetupDone: boolean;
+  hasCompletedTFASetup: boolean;
   hasShownInitialKnowMoreSendSheet: boolean;
   setTwoFASetup: any;
   setAverageTxFee: any;
@@ -575,10 +575,10 @@ class Send extends Component<SendPropsTypes, SendStateTypes> {
   };
 
   twoFASetupMethod = async () => {
-    const { accountsState, isTwoFASetupDone } = this.props;
+    const { accountsState, hasCompletedTFASetup } = this.props;
 
     if (
-      !isTwoFASetupDone &&
+      !hasCompletedTFASetup &&
       accountsState[this.state.serviceType].service.secureHDWallet.twoFASetup
     ) {
       this.props.navigation.navigate('TwoFASetup', {
@@ -915,7 +915,7 @@ const mapStateToProps = (state) => {
       state,
       (_) => _.trustedContacts.trustedContactsInfo,
     ),
-    isTwoFASetupDone: idx(state, (_) => _.preferences.isTwoFASetupDone),
+    hasCompletedTFASetup: idx(state, (_) => _.preferences.hasCompletedTFASetup),
     hasShownInitialKnowMoreSendSheet: idx(
       state,
       (_) => _.preferences.hasShownInitialKnowMoreSendSheet,
