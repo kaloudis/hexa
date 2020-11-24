@@ -139,14 +139,10 @@ export default function NewWalletQuestion(props) {
     }
   };
 
-  const setBackspace = (event) => {
-    if (event.nativeEvent.key == 'Backspace') {
-      setTimeout(() => {
+  const handleBackspacePress = () => {
         setAnsError('');
-        setConfirmAnswer('');
-        setConfirmAnswerMasked('');
-      }, 70);
-    }
+        // setConfirmAnswer('');
+        // setConfirmAnswerMasked('');
   };
 
   useEffect(() => {
@@ -415,14 +411,14 @@ export default function NewWalletQuestion(props) {
                           }, 2);
                         }
                       }}
-                      onKeyPress={(e) => {
-                        if (e.nativeEvent.key === 'Backspace') {
-                          setTimeout(() => {
-                            setAnswer('');
-                            setAnswerMasked('');
-                          }, 70);
-                        }
-                      }}
+                      // onKeyPress={(e) => {
+                      //   if (e.nativeEvent.key === 'Backspace') {
+                      //     setTimeout(() => {
+                      //       setAnswer('');
+                      //       setAnswerMasked('');
+                      //     }, 70);
+                      //   }
+                      // }}
                     />
                     {answer ? (
                       <TouchableWithoutFeedback
@@ -471,7 +467,9 @@ export default function NewWalletQuestion(props) {
                       editable={isEditable}
                       autoCapitalize="none"
                       onKeyPress={(event) => {
-                        setBackspace(event);
+                        if (event.nativeEvent.key == 'Backspace') {
+                          handleBackspacePress();
+                        }
                       }}
                       onChangeText={(text) => {
                         setTempAns(text);
